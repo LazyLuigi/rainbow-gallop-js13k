@@ -1,0 +1,526 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Atelier — licorne vue de dos</title>
+<style>
+:root{
+  --ink:#170d2c;          /* fond planche */
+  --ink2:#241546;
+  --paper:#ece1cd;        /* carton des planches */
+  --paper2:#dbcdb2;
+  --line:#5a4a7a;
+  --gold:#d8a34a;         /* accent : la corne */
+  --txt:#2a1c3f;
+  --dim:#7a6a92;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--ink);color:var(--paper);
+  font:15px/1.5 ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+body{background:radial-gradient(120% 80% at 50% 0%,#2a1750 0%,var(--ink) 55%,#0e0720 100%);min-height:100vh}
+h1,h2,.serif{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-weight:600}
+
+header{padding:26px 24px 14px;border-bottom:1px solid #392655}
+.tag{font-size:11px;letter-spacing:.22em;color:var(--gold);text-transform:uppercase}
+h1{font-size:30px;margin:6px 0 2px;letter-spacing:-.01em}
+h1 em{font-style:italic;color:var(--gold)}
+.sub{color:var(--dim);font-size:13px;max-width:70ch}
+
+/* ---- barre de contrôles ---- */
+.bar{position:sticky;top:0;z-index:9;display:flex;flex-wrap:wrap;gap:18px;align-items:center;
+  padding:10px 24px;background:rgba(16,9,34,.93);backdrop-filter:blur(6px);border-bottom:1px solid #392655}
+.grp{display:flex;align-items:center;gap:7px}
+.grp>span{font-size:10px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+button{font:inherit;font-size:12px;padding:5px 11px;border:1px solid #46326d;background:#1e1338;
+  color:var(--paper);border-radius:2px;cursor:pointer;transition:.13s}
+button:hover{border-color:var(--gold);color:#fff}
+button[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:#25162f;font-weight:700}
+button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.swatch{width:22px;height:22px;padding:0;border-radius:50%}
+input[type=range]{width:120px;accent-color:var(--gold)}
+
+/* ---- bandeau échelle réelle ---- */
+.hero{padding:20px 24px 26px}
+.hero h2{font-size:18px;margin:0 0 3px}
+.hero p{margin:0 0 12px;color:var(--dim);font-size:12.5px}
+#strip{display:block;width:100%;height:auto;border-radius:3px;border:1px solid #46326d}
+
+/* ---- planches ---- */
+main{display:grid;grid-template-columns:repeat(auto-fill,minmax(292px,1fr));gap:20px;padding:8px 24px 40px}
+.plate{background:var(--paper);color:var(--txt);border-radius:3px;overflow:hidden;
+  box-shadow:0 14px 28px rgba(0,0,0,.45);display:flex;flex-direction:column}
+.plate.pick{outline:3px solid var(--gold);outline-offset:0}
+.stage{position:relative;aspect-ratio:4/5;display:grid;place-items:center;overflow:hidden;
+  border-bottom:1px solid var(--paper2)}
+.stage canvas{max-width:100%;max-height:100%;display:block}
+.num{position:absolute;top:8px;left:10px;font-family:"Iowan Old Style",Georgia,serif;font-size:26px;
+  font-style:italic;color:rgba(255,255,255,.85);text-shadow:0 1px 3px rgba(0,0,0,.6);pointer-events:none}
+.meta{padding:11px 13px 13px}
+.nm{font-family:"Iowan Old Style",Georgia,serif;font-size:17px;margin:0 0 2px}
+.ds{font-size:11.5px;color:#6b5a86;margin:0 0 9px;min-height:2.6em;line-height:1.35}
+.data{display:flex;gap:12px;font-size:10.5px;color:#7a6a92;border-top:1px dashed #c9b99c;padding-top:8px}
+.data b{color:var(--txt);font-weight:700}
+.film{display:flex;gap:4px;padding:0 13px 12px}
+.film canvas{width:25%;height:auto;background:#2a1a48;border-radius:2px}
+.pickbtn{margin:0 13px 13px;width:calc(100% - 26px);border-color:#c9b99c;background:#f7f0e2;color:var(--txt)}
+.pickbtn:hover{background:#fff}
+
+/* ---- panneau critères ---- */
+.crit{margin:0 24px 34px;padding:16px 20px;border:1px solid #46326d;border-radius:3px;background:#1b1038}
+.crit h2{font-size:15px;margin:0 0 8px;color:var(--gold)}
+.crit ol{margin:0;padding-left:20px;color:#c9bbe0;font-size:12.5px;line-height:1.75}
+.crit li b{color:#fff}
+footer{padding:0 24px 40px;color:var(--dim);font-size:12px}
+@media (max-width:640px){.bar{gap:12px;padding:9px 14px}header,.hero,footer{padding-left:14px;padding-right:14px}
+  main{padding-left:14px;padding-right:14px}.crit{margin-left:14px;margin-right:14px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body>
+
+<header>
+  <div class="tag">Atelier de sprites · Rainbow Gallop</div>
+  <h1>Licorne <em>vue de dos</em> — six directions</h1>
+  <p class="sub">Six façons de dessiner la même anatomie arrière. Tout est généré au trait par code,
+  fond transparent, quatre poses de galop. Le seul juge qui compte est le bandeau du haut : la taille
+  réelle à laquelle la licorne apparaît en course.</p>
+</header>
+
+<div class="bar">
+  <div class="grp"><span>Fond</span>
+    <button data-bg="road">route</button><button data-bg="alpha">damier</button><button data-bg="sky">ciel</button></div>
+  <div class="grp"><span>Robe</span><span id="robes"></span></div>
+  <div class="grp"><span>Galop</span>
+    <button id="play">lecture</button>
+    <input type="range" id="frame" min="0" max="3" step="1" value="0"></div>
+  <div class="grp"><span>Zoom</span><input type="range" id="zoom" min="60" max="220" step="5" value="130"></div>
+  <div class="grp"><button id="sil" aria-pressed="false">silhouette</button></div>
+</div>
+
+<section class="hero">
+  <h2>Épreuve à l'échelle du jeu</h2>
+  <p>Taille réelle sur la route arc-en-ciel, à 60 fps. C'est ici que se décide la lisibilité.</p>
+  <canvas id="strip" width="1600" height="420"></canvas>
+</section>
+
+<main id="plates"></main>
+
+<section class="crit">
+  <h2>Les cinq marqueurs d'une vraie vue de dos</h2>
+  <ol>
+    <li><b>La croupe en deux masses</b> séparées par le sillon central où s'attache la queue. C'est le signal n°1.</li>
+    <li><b>La queue tombe au milieu</b>, pas sur le côté. De dos elle coupe le corps en deux.</li>
+    <li><b>Les oreilles en V</b> au sommet, et presque pas de museau : la tête est vue de l'arrière.</li>
+    <li><b>Les postérieurs en A</b> : jarrets écartés, canons qui rentrent, sabots rapprochés.</li>
+    <li><b>Symétrie</b>, rompue seulement par la crinière qui retombe d'un côté.</li>
+  </ol>
+</section>
+
+<footer>Choisis une direction (bouton « garder celle-ci »), je l'intègre au jeu et je réajuste le budget.</footer>
+
+<script>
+"use strict";
+// =====================================================================
+//  ATELIER — six licornes vues de dos.
+//  Repere logique commun : 200 x 300, sol a y=290, axe de symetrie x=100.
+// =====================================================================
+var TAU=6.2832, LW=200, LH=300, GY=288, CX=100;
+// Squelette commun, cale sur les proportions de la photo de reference :
+// corne 5% / tete 10% / encolure 15% / corps 30% / jambes 26% de la hauteur.
+var SK={horn:14,ear:26,head:56,hrx:20,hry:22, neck0:120,neck1:78,
+        wit:118,back:146,croup:176,crx:54,cry:40, lobe:22,lrx:27,lry:37,
+        hock:248,hoof:284,hockX:34,hoofX:20};
+function hsl(h,s,l,a){ return 'hsla('+h+','+s+'%,'+l+'%,'+(a==null?1:a)+')'; }
+function E(g,x,y,rx,ry,r){ g.beginPath(); g.ellipse(x,y,Math.abs(rx),Math.abs(ry),r||0,0,TAU); }
+function EF(g,x,y,rx,ry,r,c){ E(g,x,y,rx,ry,r); g.fillStyle=c; g.fill(); }
+function L(g,x0,y0,x1,y1,w,c){ g.lineCap='round'; g.strokeStyle=c; g.lineWidth=w;
+  g.beginPath(); g.moveTo(x0,y0); g.lineTo(x1,y1); g.stroke(); }
+function Q(g,x0,y0,cx,cy,x1,y1,w,c){ g.lineCap='round'; g.strokeStyle=c; g.lineWidth=w;
+  g.beginPath(); g.moveTo(x0,y0); g.quadraticCurveTo(cx,cy,x1,y1); g.stroke(); }
+function P(g,pts,c){ g.beginPath(); g.moveTo(pts[0],pts[1]);
+  for(var i=2;i<pts.length;i+=2) g.lineTo(pts[i],pts[i+1]); g.closePath(); g.fillStyle=c; g.fill(); }
+
+// Poses de galop vues de dos : le sabot monte, la jambe raccourcit.
+var POSE=[
+ {lift: 0, sway: 0, tilt: 1.6, hl:[80,284], hr:[122,256]},
+ {lift:-9, sway:-4, tilt: 0,   hl:[84,252], hr:[117,246]},
+ {lift:-2, sway: 2, tilt:-1.6, hl:[80,258], hr:[120,284]},
+ {lift:-5, sway:-1, tilt: 0.6, hl:[82,274], hr:[118,268]}
+];
+// Postérieurs en A : jarret écarté, canon qui rentre, sabots rapprochés.
+function legs(g,p,d,st){
+  [[-1,p.hl],[1,p.hr]].forEach(function(e){
+    var s=e[0], f=e[1], hx=CX+s*SK.hockX, hy=SK.hock+d*0.4;
+    L(g,CX+s*22,SK.croup+14+d,hx,hy,st.tw,st.thigh);      // cuisse -> jarret
+    L(g,hx,hy,f[0],f[1]-5,st.cw,st.cannon);               // canon -> paturon
+    if(st.hoof){ E(g,f[0],f[1]-2,st.cw*0.62,st.cw*0.46,0); g.fillStyle=st.hoof; g.fill(); }
+  });
+}
+// Anterieurs entrevus entre les posterieurs : plus loin donc plus haut et plus sombres.
+function frontHint(g,d,c){ L(g,95,SK.croup+52+d,94,262,8,c); L(g,107,SK.croup+52+d,108,258,8,c); }
+
+// =====================================================================
+//  1. ETUDE ANATOMIQUE — volumes doux sans contour, fidele a la photo
+// =====================================================================
+function v1(g,o){
+  var p=POSE[o.fr], d=p.lift, t=p.tilt, i;
+  var A=hsl(o.h,o.s,96), B=hsl(o.h,o.s,88), M=hsl(o.h,o.s,79), D=hsl(o.h,o.s,64), S=hsl(o.h,o.s,52);
+  frontHint(g,d,S);
+  legs(g,p,d,{thigh:M,cannon:D,hoof:'#39303f',tw:26,cw:13});
+  EF(g,CX,SK.croup+34+d,32,13,0,hsl(o.h,o.s,56,.55));            // ombre du ventre
+  // encolure et tete d'abord : le corps passera devant
+  P(g,[CX-21,SK.neck0+d,CX+21,SK.neck0+d,CX+15,SK.neck1+d,CX-15,SK.neck1+d],B);
+  P(g,[CX-8,SK.neck0+d,CX+8,SK.neck0+d,CX+6,SK.neck1+d,CX-6,SK.neck1+d],A);
+  EF(g,CX,SK.head+d,SK.hrx,SK.hry,0,B);
+  EF(g,CX-15,SK.head+8+d,9,12,-0.3,M); EF(g,CX+15,SK.head+8+d,9,12,0.3,M);   // joues
+  P(g,[CX-12,SK.ear+16+d,CX-23,SK.ear-10+d,CX-3,SK.ear+8+d],B);              // oreilles en V
+  P(g,[CX+12,SK.ear+16+d,CX+23,SK.ear-10+d,CX+3,SK.ear+8+d],B);
+  P(g,[CX-13,SK.ear+12+d,CX-19,SK.ear-4+d,CX-7,SK.ear+8+d],hsl(340,38,70));
+  P(g,[CX+13,SK.ear+12+d,CX+19,SK.ear-4+d,CX+7,SK.ear+8+d],hsl(340,38,70));
+  var hg=g.createLinearGradient(CX-5,SK.ear+18+d,CX+5,SK.horn+d);
+  hg.addColorStop(0,'#c98f2e'); hg.addColorStop(.5,'#ffd97a'); hg.addColorStop(1,'#fff6d8');
+  P(g,[CX-6,SK.ear+18+d,CX+6,SK.ear+18+d,CX+1,SK.horn+d],hg);
+  for(i=0;i<4;i++) L(g,CX-5+i*1.2,SK.ear+12+d-i*7,CX+5-i*1.4,SK.ear+9+d-i*7,1.5,'rgba(150,105,30,.45)');
+  // corps : garrot, dos, puis croupe en deux masses
+  EF(g,CX,SK.wit+d,27,20,0,hsl(o.h,o.s,86));
+  EF(g,CX,SK.back+d,35,26,0,hsl(o.h,o.s,84));
+  var gr=g.createLinearGradient(0,SK.croup-40+d,0,SK.croup+40+d);
+  gr.addColorStop(0,A); gr.addColorStop(.42,B); gr.addColorStop(1,D);
+  EF(g,CX,SK.croup+d,SK.crx,SK.cry,0,gr);
+  EF(g,CX-SK.lobe,SK.croup+4+d+t,SK.lrx,SK.lry,-0.05,hsl(o.h,o.s,90));   // fesse gauche
+  EF(g,CX+SK.lobe,SK.croup+4+d-t,SK.lrx,SK.lry,0.05,hsl(o.h,o.s,90));    // fesse droite
+  EF(g,CX-SK.lobe-4,SK.croup-12+d,17,20,-0.1,hsl(o.h,o.s,97,.6));        // reflets
+  EF(g,CX+SK.lobe+4,SK.croup-12+d,17,20,0.1,hsl(o.h,o.s,97,.6));
+  Q(g,CX,SK.croup-36+d,CX,SK.croup+d,CX,SK.croup+34+d,6,hsl(o.h,o.s,68,.55));  // sillon
+  // criniere : crete qui retombe a gauche
+  for(i=0;i<8;i++){ var y=SK.ear+18+i*8+d;
+    Q(g,CX-1,y,CX-8-i*1.1+p.sway,y+7,CX-10-i*1.5+p.sway*1.4,y+15,5-i*0.1,hsl(i*40,82,60)); }
+  // queue : cascade centrale depuis le haut de la croupe
+  EF(g,CX,SK.croup-32+d,7,6,0,hsl(o.h,o.s,70));                  // attache de la queue
+  for(i=0;i<11;i++){ var ox=(i-5)*2.6;
+    Q(g,CX+ox*0.14,SK.croup-34+d, CX+ox*0.58+p.sway*2,SK.croup+18, CX+ox*0.95+p.sway*3.4,SK.croup+86-Math.abs(i-5)*3,5.5,hsl(i*33,84,62)); }
+  for(i=0;i<7;i++) Q(g,CX+(i-3)*1.4,SK.croup-28+d,CX+(i-3)*3+p.sway*2,SK.croup+22,CX+(i-3)*5+p.sway*3,SK.croup+70,1.2,'rgba(255,255,255,.34)');
+}
+
+// =====================================================================
+//  2. CONTOUR D'ENCRE — cel-shading, trait franc, lisible tres loin
+// =====================================================================
+function v2(g,o){
+  var p=POSE[o.fr], d=p.lift, i, OL='#2e1550', W=5;
+  var B=hsl(o.h,o.s,93), M=hsl(o.h,o.s,80), G='#ffd35e';
+  g.lineJoin='round';
+  function ink(fn){ fn(); g.fillStyle=B; g.fill(); g.strokeStyle=OL; g.lineWidth=W; g.stroke(); }
+  frontHint(g,d,hsl(o.h,o.s,58));
+  [[-1,p.hl],[1,p.hr]].forEach(function(e){
+    var s=e[0], f=e[1], hx=CX+s*SK.hockX;
+    L(g,CX+s*22,SK.croup+14+d,hx,SK.hock,24,OL); L(g,hx,SK.hock,f[0],f[1]-5,18,OL);
+    L(g,CX+s*22,SK.croup+14+d,hx,SK.hock,17,B);  L(g,hx,SK.hock,f[0],f[1]-5,11,B);
+    E(g,f[0],f[1]-3,9,7,0); g.fillStyle=G; g.fill(); g.strokeStyle=OL; g.lineWidth=4; g.stroke();
+  });
+  ink(function(){ P2(g,[CX-21,SK.neck0+d,CX+21,SK.neck0+d,CX+15,SK.neck1+d,CX-15,SK.neck1+d]); });
+  ink(function(){ E(g,CX,SK.head+d,SK.hrx+1,SK.hry,0); });
+  [[-1],[1]].forEach(function(e){ var s=e[0]; W=3.5;
+    ink(function(){ P2(g,[CX+s*15,SK.ear+18+d,CX+s*26,SK.ear-11+d,CX+s*2,SK.ear+6+d]); }); W=5; });
+  ink(function(){ E(g,CX,SK.back+d,36,27,0); });
+  ink(function(){ E(g,CX,SK.croup+d,SK.crx,SK.cry,0); });
+  EF(g,CX-SK.lobe,SK.croup+3+d,23,33,0,hsl(o.h,o.s,99));
+  EF(g,CX+SK.lobe,SK.croup+3+d,23,33,0,hsl(o.h,o.s,99));
+  Q(g,CX,SK.croup-34+d,CX,SK.croup+d,CX,SK.croup+32+d,5,OL);
+  g.beginPath(); g.moveTo(CX-7,SK.ear+18+d); g.lineTo(CX+7,SK.ear+18+d); g.lineTo(CX,SK.horn-2+d);
+  g.closePath(); g.fillStyle=G; g.fill(); g.strokeStyle=OL; g.lineWidth=4; g.stroke();
+  for(i=0;i<6;i++) Q(g,CX-2,SK.ear+20+i*10+d,CX-15-i*2+p.sway,SK.ear+30+i*10+d,CX-18-i*3+p.sway*2,SK.ear+44+i*10+d,11,hsl(i*58,92,60));
+  for(i=0;i<7;i++){ var ox=(i-3)*3.4;
+    Q(g,CX+ox*0.2,SK.croup-32+d, CX+ox*0.6+p.sway*2,SK.croup+18, CX+ox*0.85+p.sway*3,SK.croup+82-Math.abs(i-3)*4,10,hsl(i*50,90,60)); }
+}
+function P2(g,pts){ g.beginPath(); g.moveTo(pts[0],pts[1]);
+  for(var i=2;i<pts.length;i+=2) g.lineTo(pts[i],pts[i+1]); g.closePath(); }
+
+// =====================================================================
+//  3. NEON RETRO — masse sombre, lumiere de bord. Contraste inverse.
+// =====================================================================
+function v3(g,o){
+  var p=POSE[o.fr], d=p.lift, i, body='#1d0f3a', edge=hsl(o.h,85,70);
+  g.lineJoin='round';
+  function mass(fn){ fn(); g.fillStyle=body; g.fill();
+    g.strokeStyle=edge; g.lineWidth=2.6; g.stroke(); }
+  [[-1,p.hl],[1,p.hr]].forEach(function(e){
+    var s=e[0], f=e[1], hx=CX+s*SK.hockX;
+    L(g,CX+s*22,SK.croup+14+d,hx,SK.hock,19,body); L(g,hx,SK.hock,f[0],f[1]-5,13,body);
+    L(g,CX+s*22,SK.croup+14+d,hx,SK.hock,2.2,edge); L(g,hx,SK.hock,f[0],f[1]-5,2.2,edge);
+    L(g,f[0]-6,f[1]-3,f[0]+6,f[1]-3,4,'#ffdf8f');
+  });
+  mass(function(){ P2(g,[CX-21,SK.neck0+d,CX+21,SK.neck0+d,CX+15,SK.neck1+d,CX-15,SK.neck1+d]); });
+  mass(function(){ E(g,CX,SK.head+d,SK.hrx,SK.hry,0); });
+  [[-1],[1]].forEach(function(e){ var s=e[0];
+    mass(function(){ P2(g,[CX+s*12,SK.ear+16+d,CX+s*24,SK.ear-10+d,CX+s*2,SK.ear+8+d]); }); });
+  mass(function(){ E(g,CX,SK.back+d,35,26,0); });
+  mass(function(){ E(g,CX,SK.croup+d,SK.crx,SK.cry,0); });
+  // relief : deux arcs de lumiere sur les fesses + sillon
+  g.strokeStyle=hsl(o.h,90,78,.85); g.lineWidth=2;
+  E(g,CX-SK.lobe,SK.croup+2+d,24,29,0); g.stroke();
+  E(g,CX+SK.lobe,SK.croup+2+d,24,29,0); g.stroke();
+  Q(g,CX,SK.croup-32+d,CX,SK.croup+d,CX,SK.croup+30+d,2,edge);
+  g.save(); g.globalCompositeOperation='lighter'; g.shadowColor=edge; g.shadowBlur=5;
+  var hg=g.createLinearGradient(CX,SK.ear+18+d,CX,SK.horn+d);
+  hg.addColorStop(0,'rgba(255,205,110,.25)'); hg.addColorStop(1,'#fff6d8');
+  P(g,[CX-5,SK.ear+18+d,CX+5,SK.ear+18+d,CX,SK.horn-2+d],hg);
+  for(i=0;i<8;i++) Q(g,CX-1,SK.ear+20+i*9+d,CX-12-i*1.8+p.sway,SK.ear+30+i*9+d,CX-15-i*2.6+p.sway*2,SK.ear+43+i*9+d,3.2,hsl(i*45,100,64,.5));
+  for(i=0;i<9;i++){ var ox=(i-4)*3;
+    Q(g,CX+ox*0.2,SK.croup-32+d,CX+ox*0.6+p.sway*2,SK.croup+16,CX+ox*0.85+p.sway*3,SK.croup+84-Math.abs(i-4)*3,3.4,hsl(i*40,100,64,.5)); }
+  g.restore();
+}
+
+// =====================================================================
+//  4. APLATS DECOUPES — papier decoupe, trois tons francs
+// =====================================================================
+function v4(g,o){
+  var p=POSE[o.fr], d=p.lift, i;
+  var A=hsl(o.h,o.s,95), B=hsl(o.h,o.s,83), C=hsl(o.h,o.s,66), G='#f4bf4e';
+  g.save(); g.translate(3,4); g.globalAlpha=.16;
+  EF(g,CX,SK.croup+d,SK.crx,SK.cry,0,'#000'); EF(g,CX,SK.head+d,SK.hrx,SK.hry,0,'#000'); g.restore();
+  P(g,[CX-7,SK.croup+34+d,CX+7,SK.croup+34+d,CX+6,262,CX-6,262],C);
+  [[-1,p.hl],[1,p.hr]].forEach(function(e){
+    var s=e[0], f=e[1], hx=CX+s*SK.hockX;
+    P(g,[CX+s*10,SK.croup+10+d,CX+s*32,SK.croup+6+d,hx+s*7,SK.hock,hx-s*7,SK.hock],C);
+    P(g,[hx-s*7,SK.hock,hx+s*7,SK.hock,f[0]+s*6,f[1]-6,f[0]-s*6,f[1]-6],B);
+    P(g,[f[0]-8,f[1]-8,f[0]+8,f[1]-8,f[0]+6,f[1]+2,f[0]-6,f[1]+2],G);
+  });
+  P(g,[CX-21,SK.neck0+d,CX+21,SK.neck0+d,CX+15,SK.neck1+d,CX-15,SK.neck1+d],A);
+  P(g,[CX-21,SK.head+18+d,CX+21,SK.head+18+d,CX+16,SK.head-20+d,CX-16,SK.head-20+d],B);
+  P(g,[CX-16,SK.ear+14+d,CX-25,SK.ear-12+d,CX-4,SK.ear+6+d],B);
+  P(g,[CX+16,SK.ear+14+d,CX+25,SK.ear-12+d,CX+4,SK.ear+6+d],B);
+  P(g,[CX-7,SK.ear+16+d,CX+7,SK.ear+16+d,CX,SK.horn-4+d],G);
+  P(g,[CX-7,SK.ear+16+d,CX,SK.ear+16+d,CX,SK.horn-4+d],'#ffe4a0');
+  P(g,[CX-34,SK.back+22+d,CX+34,SK.back+22+d,CX+27,SK.back-22+d,CX-27,SK.back-22+d],B);
+  EF(g,CX-SK.lobe,SK.croup+3+d,27,38,0,B); EF(g,CX+SK.lobe,SK.croup+3+d,27,38,0,B);
+  EF(g,CX-SK.lobe-2,SK.croup-10+d,20,22,0,A); EF(g,CX+SK.lobe+2,SK.croup-10+d,20,22,0,A);
+  P(g,[CX-3,SK.croup-36+d,CX+3,SK.croup-36+d,CX+5,SK.croup+34+d,CX-5,SK.croup+34+d],C);
+  for(i=0;i<6;i++) P(g,[CX-2,SK.ear+16+i*9+d, CX-19-i*2+p.sway,SK.ear+24+i*9+d,
+    CX-19-i*2+p.sway,SK.ear+33+i*9+d, CX-2,SK.ear+25+i*9+d],hsl(i*58,85,60));
+  for(i=0;i<7;i++){ var a=(i-3)*0.055+p.sway*0.015, x=CX+Math.sin(a)*118, y=SK.croup-34+d+Math.cos(a)*118;
+    P(g,[CX-5,SK.croup-34+d,CX+5,SK.croup-34+d,x+5,y,x-5,y],hsl(i*50,85,60)); }
+  EF(g,CX,SK.croup-34+d,9,6,0,C);
+}
+
+// =====================================================================
+//  5. PIXEL HD — meme anatomie rasterisee, 50x75, rampe de 5 tons
+// =====================================================================
+function v5(g,o){
+  var p=POSE[o.fr], d=p.lift/4, px=4, GW=50, GH=75, x, y, i, k;
+  var pal=[hsl(o.h,o.s,98),hsl(o.h,o.s,87),hsl(o.h,o.s,71),hsl(o.h,o.s,53),'#2b1a4d'], GR=[];
+  function ine(x,y,cx,cy,rx,ry){ var a=(x-cx)/rx, b=(y-cy)/ry; return a*a+b*b<=1; }
+  var CQ=SK.croup/4, HQ=SK.head/4;
+  for(y=0;y<GH;y++) for(x=0;x<GW;x++){
+    var t=-1, u=x-25;
+    if(ine(x,y,25,CQ+d,13.5,10)) t=1;                                   // croupe
+    if(ine(x,y,25,SK.back/4+d,8.8,6.5)) t=1;                            // dos
+    if(y>SK.neck1/4+d&&y<SK.neck0/4+d&&Math.abs(u)<5.2-(y-SK.neck1/4-d)*0.05) t=1;
+    if(ine(x,y,25,HQ+d,5,5.5)) t=1;                                     // tete
+    if(t>0){
+      var sh=(y-(CQ-6+d))/22+Math.abs(u)/15;                            // modele
+      t = sh<0.1?0 : sh<0.55?1 : sh<0.92?2 : 3;
+      if(Math.abs(u)<0.9&&y>CQ-9+d&&y<CQ+9+d) t=3;                      // sillon
+      if(y<HQ+7+d&&Math.abs(u)>3) t=2;                                  // joues
+    }
+    // posterieurs en A
+    [[-1,p.hl],[1,p.hr]].forEach(function(e){
+      var s=e[0], fx=e[1][0]/4, fy=e[1][1]/4, hx=25+s*8.5, hy=SK.hock/4;
+      var y0=CQ+3.5+d;
+      if(y>=y0&&y<=hy){ var q=(y-y0)/(hy-y0), cx=25+s*5.5+(hx-25-s*5.5)*q;
+        if(Math.abs(x-cx)<3.6-q*0.5) t=(x-cx)*s<-0.8?1:2; }
+      if(y>hy&&y<=fy-0.5){ var q2=(y-hy)/((fy-0.5)-hy||1), cx2=hx+(fx-hx)*q2;
+        if(Math.abs(x-cx2)<2.9-q2*0.5) t=(x-cx2)*s<-0.6?1:2;
+        if(y>fy-2.4&&Math.abs(x-cx2)<3) t=4; }
+    });
+    (GR[y]=GR[y]||[])[x]=t;
+  }
+  for(y=0;y<GH;y++) for(x=0;x<GW;x++){ var v=GR[y][x]; if(v<0) continue;
+    var edge=(y===0||GR[y-1][x]<0)||(y===GH-1||!GR[y+1]||GR[y+1][x]<0)||
+             (x===0||GR[y][x-1]<0)||(x===GW-1||GR[y][x+1]<0);
+    g.fillStyle=edge?'#3a2260':pal[v]; g.fillRect(x*px,y*px,px,px);
+  }
+  for(i=0;i<10;i++){ var w=Math.max(1,Math.round(3-i*0.25));            // corne
+    g.fillStyle=i<3?'#fff2ca':i<7?'#ffd35e':'#d99b28';
+    g.fillRect((25-w/2)*px,Math.round(SK.ear/4+3+d-i)*px,w*px,px); }
+  [[-1],[1]].forEach(function(e){ var s=e[0];                            // oreilles
+    for(i=0;i<5;i++){ g.fillStyle=pal[1];
+      g.fillRect(Math.round(25+s*(3.4+i*0.5))*px,Math.round(SK.ear/4+3+d-i)*px,px*(i<3?2:1),px); } });
+  for(i=0;i<10;i++){ g.fillStyle=hsl(i*36,88,62);                        // criniere
+    g.fillRect(Math.round(25-1.2-i*0.32+p.sway*0.25)*px,Math.round(SK.ear/4+5+d+i*1.9)*px,px*2,px*2); }
+  for(i=0;i<11;i++){ var c=hsl(i*32,86,62);                              // queue
+    for(k=0;k<8;k++){ var qx=25+(i-5)*0.66+p.sway*0.1*k, qy=CQ-8.5+d+k*2.4+Math.abs(i-5)*0.45;
+      if(qy>CQ+19) continue; g.fillStyle=c; g.fillRect(Math.round(qx)*px,Math.round(qy)*px,px,px*3); } }
+}
+
+// =====================================================================
+//  6. AQUARELLE IRIDESCENTE — volumes souffles, silhouette conservee
+// =====================================================================
+function v6(g,o){
+  var p=POSE[o.fr], d=p.lift, i;
+  var A=hsl(o.h,o.s,97), B=hsl(o.h,o.s,86), M=hsl(o.h,o.s,74);
+  function blob(x,y,rx,ry){
+    var gr=g.createRadialGradient(x-rx*0.28,y-ry*0.42,rx*0.08,x,y,rx);
+    gr.addColorStop(0,A); gr.addColorStop(.5,B); gr.addColorStop(.9,M);
+    gr.addColorStop(1,hsl(o.h,o.s,68,.45));
+    E(g,x,y,rx,ry,0); g.fillStyle=gr; g.fill();
+  }
+  frontHint(g,d,hsl(o.h,o.s,60,.8));
+  legs(g,p,d,{thigh:M,cannon:hsl(o.h,o.s,66),hoof:'#e0b45c',tw:23,cw:12});
+  blob(CX,SK.head+d,SK.hrx+2,SK.hry+2);
+  blob(CX-15,SK.head+9+d,9,11); blob(CX+15,SK.head+9+d,9,11);
+  P(g,[CX-12,SK.ear+16+d,CX-23,SK.ear-9+d,CX-3,SK.ear+8+d],B);
+  P(g,[CX+12,SK.ear+16+d,CX+23,SK.ear-9+d,CX+3,SK.ear+8+d],B);
+  blob(CX,(SK.neck0+SK.neck1)/2+d,19,(SK.neck0-SK.neck1)/2+4);
+  blob(CX,SK.wit+d,26,19); blob(CX,SK.back+d,34,25);
+  blob(CX,SK.croup+d,SK.crx-2,SK.cry);
+  blob(CX-SK.lobe,SK.croup+4+d,25,35); blob(CX+SK.lobe,SK.croup+4+d,25,35);
+  Q(g,CX,SK.croup-34+d,CX,SK.croup+d,CX,SK.croup+30+d,8,hsl(o.h,o.s,64,.4));
+  g.save(); g.globalCompositeOperation='lighter';
+  var hg=g.createLinearGradient(CX,SK.ear+18+d,CX,SK.horn+d);
+  hg.addColorStop(0,'rgba(255,200,110,.3)'); hg.addColorStop(.6,'rgba(255,226,150,.9)'); hg.addColorStop(1,'#fffaf0');
+  P(g,[CX-5,SK.ear+18+d,CX+5,SK.ear+18+d,CX,SK.horn-2+d],hg);
+  for(i=0;i<12;i++) Q(g,CX-1,SK.ear+20+i*6+d,CX-11-i*1.1+p.sway,SK.ear+31+i*6+d,CX-14-i*1.8+p.sway*2,SK.ear+44+i*6+d,6,hsl(i*30,95,68,.42));
+  for(i=0;i<14;i++){ var ox=(i-6.5)*2.2;
+    Q(g,CX+ox*0.2,SK.croup-32+d,CX+ox*0.6+p.sway*2,SK.croup+16,CX+ox*0.9+p.sway*3,SK.croup+84-Math.abs(i-6.5)*2.4,6.5,hsl(i*24,95,68,.42)); }
+  g.restore();
+}
+
+// =====================================================================
+//  Catalogue
+// =====================================================================
+var VAR=[
+ {f:v1,n:"Étude anatomique",d:"Volumes doux sans contour, croupe en deux masses, sillon marqué. Le plus proche de la photo."},
+ {f:v2,n:"Contour d'encre",d:"Cel-shading, trait épais, gros sabots dorés. Tient la lisibilité même minuscule."},
+ {f:v3,n:"Néon rétro",d:"Corps sombre et lumière de bord : se détache par contraste inversé sur une route très claire."},
+ {f:v4,n:"Aplats découpés",d:"Papier découpé, trois tons francs, zéro dégradé. Graphique et très économe."},
+ {f:v5,n:"Pixel HD",d:"Même anatomie rastérisée en 50×75 pixels, rampe de cinq tons. Parti pris arcade."},
+ {f:v6,n:"Aquarelle iridescente",d:"Volumes soufflés, aucune arête, crinière et queue en voiles superposés."}
+];
+var ROBES=[[300,14,"nacre"],[335,62,"rose"],[158,52,"menthe"],[42,72,"or"],[205,58,"ciel"],[265,54,"lavande"]];
+
+// --- etat ------------------------------------------------------------
+var st={bg:'road',robe:0,fr:0,play:true,zoom:130,sil:false}, T=0;
+
+function mk(w,h){ var c=document.createElement('canvas'); c.width=w; c.height=h; return c; }
+var tmp=mk(LW,LH), tg=tmp.getContext('2d');
+
+// rend une variante dans un contexte, a l'echelle voulue
+function paint(g,idx,scale,fr){
+  var o={h:ROBES[st.robe][0],s:ROBES[st.robe][1],fr:fr==null?st.fr:fr};
+  tg.setTransform(1,0,0,1,0,0); tg.clearRect(0,0,LW,LH);
+  VAR[idx].f(tg,o);
+  if(st.sil){ tg.globalCompositeOperation='source-in'; tg.fillStyle='#000';
+    tg.fillRect(0,0,LW,LH); tg.globalCompositeOperation='source-over'; }
+  g.imageSmoothingEnabled=(idx!==4);
+  g.drawImage(tmp,0,0,LW,LH,0,0,LW*scale,LH*scale);
+}
+
+// --- fonds -----------------------------------------------------------
+function bgAlpha(g,w,h){ var s=12,x,y;
+  for(y=0;y<h;y+=s) for(x=0;x<w;x+=s){ g.fillStyle=((x/s+y/s)&1)?'#3b2a5e':'#31234f'; g.fillRect(x,y,s,s); } }
+function bgSky(g,w,h){ var gr=g.createLinearGradient(0,0,0,h);
+  gr.addColorStop(0,'#150a35'); gr.addColorStop(.7,'#5b2a8c'); gr.addColorStop(1,'#c9679b');
+  g.fillStyle=gr; g.fillRect(0,0,w,h); }
+function bgRoad(g,w,h,t){
+  var gr=g.createLinearGradient(0,0,0,h);
+  gr.addColorStop(0,'#2a1055'); gr.addColorStop(.34,'#a83c93'); gr.addColorStop(.42,'#ffc389');
+  gr.addColorStop(.46,'#f3d9ff'); gr.addColorStop(1,'#6b3fa8');
+  g.fillStyle=gr; g.fillRect(0,0,w,h);
+  var hz=h*0.42, i, n=26;
+  for(i=n;i>=0;i--){                        // bandes en perspective
+    var q0=i/n, q1=(i+1)/n;
+    var y0=hz+(h-hz)*q0*q0, y1=hz+(h-hz)*q1*q1;
+    var w0=w*0.06+w*0.62*q0*q0, w1=w*0.06+w*0.62*q1*q1;
+    var hue=((i>>1)*51.4+t*18)%360, alt=(i>>1)&1;
+    g.fillStyle=hsl(hue,100,alt?76:62,.75);
+    g.beginPath(); g.moveTo(w/2-w1*1.1,y1); g.lineTo(w/2-w0*1.1,y0);
+    g.lineTo(w/2+w0*1.1,y0); g.lineTo(w/2+w1*1.1,y1); g.fill();
+    g.fillStyle=hsl(hue,92,alt?55:47);
+    g.beginPath(); g.moveTo(w/2-w1,y1); g.lineTo(w/2-w0,y0);
+    g.lineTo(w/2+w0,y0); g.lineTo(w/2+w1,y1); g.fill();
+  }
+}
+function drawBg(g,w,h,t){ if(st.bg==='alpha') bgAlpha(g,w,h); else if(st.bg==='sky') bgSky(g,w,h); else bgRoad(g,w,h,t); }
+
+// --- bandeau echelle reelle ------------------------------------------
+var strip=document.getElementById('strip'), sx=strip.getContext('2d');
+function drawStrip(){
+  var w=strip.width, h=strip.height;
+  drawBg(sx,w,h,T);
+  var sc=(h*0.62)/LH, i;                        // ~ taille jeu (260 px de haut)
+  for(i=0;i<6;i++){
+    var x=w*(i+0.5)/6-LW*sc/2, y=h*0.90-LH*sc;
+    sx.save(); sx.translate(x,y+Math.sin(T*6+i)*2); paint(sx,i,sc); sx.restore();
+    sx.font='700 20px ui-monospace,monospace'; sx.textAlign='center';
+    sx.fillStyle='rgba(20,8,40,.55)'; sx.fillText(i+1,w*(i+0.5)/6+1,h*0.96+1);
+    sx.fillStyle='#fff'; sx.fillText(i+1,w*(i+0.5)/6,h*0.95);
+  }
+}
+
+// --- planches ---------------------------------------------------------
+var plates=document.getElementById('plates'), cards=[];
+VAR.forEach(function(v,i){
+  var el=document.createElement('article'); el.className='plate';
+  var src=v.f.toString(), bytes=src.replace(/\s*\/\/.*$/gm,'').replace(/\s+/g,' ').length;
+  el.innerHTML='<div class="stage"><span class="num">'+(i+1)+'</span><canvas></canvas></div>'+
+    '<div class="meta"><h3 class="nm">'+v.n+'</h3><p class="ds">'+v.d+'</p>'+
+    '<div class="data"><span>source <b>'+src.length+' o</b></span><span>compact <b>~'+bytes+' o</b></span>'+
+    '<span>budget libre <b>4405 o</b></span></div></div>'+
+    '<div class="film"><canvas></canvas><canvas></canvas><canvas></canvas><canvas></canvas></div>'+
+    '<button class="pickbtn">garder celle-ci</button>';
+  plates.appendChild(el);
+  var big=el.querySelector('.stage canvas'), film=[].slice.call(el.querySelectorAll('.film canvas'));
+  cards.push({el:el,big:big,bg:big.getContext('2d'),film:film.map(function(c){return c.getContext('2d');}),fc:film});
+  el.querySelector('.pickbtn').addEventListener('click',function(){
+    cards.forEach(function(c){ c.el.classList.remove('pick'); });
+    el.classList.add('pick');
+    el.querySelector('.pickbtn').textContent='choisie — variante '+(i+1);
+  });
+});
+function drawPlates(){
+  cards.forEach(function(c,i){
+    var sc=st.zoom/100, w=Math.round(LW*sc), h=Math.round(LH*sc);
+    if(c.big.width!==w){ c.big.width=w; c.big.height=h; }
+    drawBg(c.bg,w,h,T);
+    paint(c.bg,i,sc);
+    c.film.forEach(function(g,k){
+      var fw=110, fh=165;
+      if(c.fc[k].width!==fw){ c.fc[k].width=fw; c.fc[k].height=fh; }
+      g.clearRect(0,0,fw,fh);
+      g.fillStyle=(k===st.fr)?'#4b2f7d':'#2a1a48'; g.fillRect(0,0,fw,fh);
+      paint(g,i,fw/LW,k);
+    });
+  });
+}
+
+// --- controles --------------------------------------------------------
+function syncBg(){ [].forEach.call(document.querySelectorAll('[data-bg]'),function(b){
+  b.setAttribute('aria-pressed',b.dataset.bg===st.bg); }); }
+[].forEach.call(document.querySelectorAll('[data-bg]'),function(b){
+  b.addEventListener('click',function(){ st.bg=b.dataset.bg; syncBg(); }); });
+syncBg();
+
+var robes=document.getElementById('robes');
+ROBES.forEach(function(r,i){
+  var b=document.createElement('button'); b.className='swatch'; b.title=r[2];
+  b.style.background=hsl(r[0],r[1],r[1]>30?80:92);
+  b.setAttribute('aria-pressed',i===0);
+  b.addEventListener('click',function(){ st.robe=i;
+    [].forEach.call(robes.children,function(c,k){ c.setAttribute('aria-pressed',k===i); }); });
+  robes.appendChild(b);
+});
+var playBtn=document.getElementById('play'), frameIn=document.getElementById('frame');
+playBtn.setAttribute('aria-pressed','true');
+playBtn.addEventListener('click',function(){ st.play=!st.play;
+  playBtn.setAttribute('aria-pressed',st.play); playBtn.textContent=st.play?'lecture':'pause'; });
+frameIn.addEventListener('input',function(){ st.play=false; playBtn.setAttribute('aria-pressed','false');
+  playBtn.textContent='pause'; st.fr=+frameIn.value; });
+document.getElementById('zoom').addEventListener('input',function(e){ st.zoom=+e.target.value; });
+var silBtn=document.getElementById('sil');
+silBtn.addEventListener('click',function(){ st.sil=!st.sil; silBtn.setAttribute('aria-pressed',st.sil); });
+
+// --- boucle -----------------------------------------------------------
+var last=0, acc=0;
+function loop(ts){
+  var dt=Math.min(.05,(ts-last)/1000)||0; last=ts; T+=dt;
+  if(st.play){ acc+=dt; if(acc>0.11){ acc=0; st.fr=(st.fr+1)&3; frameIn.value=st.fr; } }
+  drawStrip(); drawPlates(); requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script></body></html>

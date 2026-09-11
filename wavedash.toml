@@ -1,0 +1,13 @@
+# Configuration du challenge Wavedash (js13kGames 2026).
+# Le jeu n'embarque aucun SDK : la plateforme injecte le global `Wavedash`
+# avant le code, et src/index.html se contente de l'appeler derriere une garde.
+#
+# game_id : a renseigner avec l'ID renvoye par
+#   wavedash project create --team-id <TEAM_ID> --title "Rainbow Gallop"
+# ou repris de `wavedash project list --team-id <TEAM_ID>`.
+game_id = "REMPLIR"
+
+# La cible Wavedash est la page non minifiee : pas de limite de taille ici, donc
+# pas de roadroller, donc pas de seconde de decodage au chargement.
+upload_dir = "dist/wavedash"
+entrypoint = "index.html"

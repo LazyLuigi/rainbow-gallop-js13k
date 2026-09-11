@@ -1,0 +1,390 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Planche 2 — l'allure vue de dos</title>
+<style>
+:root{
+  --plate:#16130f;        /* fond de planche, gélatine argentique */
+  --plate2:#221d17;
+  --bone:#ddd2be;         /* encre claire */
+  --bone2:#9a9081;
+  --rule:#3a332a;
+  --blue:#8fa8bd;         /* repères de mesure */
+  --warn:#c98f5a;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--plate);color:var(--bone);
+  font:14px/1.55 ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+body{background:
+  repeating-linear-gradient(90deg,rgba(255,255,255,.014) 0 1px,transparent 1px 64px),
+  radial-gradient(120% 90% at 50% -10%,#241d16 0%,var(--plate) 60%);min-height:100vh}
+.serif{font-family:"Baskerville","Palatino Linotype",Palatino,Georgia,serif}
+
+header{padding:30px 26px 16px;border-bottom:1px solid var(--rule)}
+.eyebrow{font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--blue)}
+h1{font-family:"Baskerville",Palatino,Georgia,serif;font-weight:400;font-size:34px;
+  margin:8px 0 4px;letter-spacing:.005em}
+h1 i{color:var(--warn)}
+header p{margin:0;max-width:74ch;color:var(--bone2);font-size:13px}
+
+.bar{position:sticky;top:0;z-index:9;display:flex;flex-wrap:wrap;gap:20px;align-items:center;
+  padding:11px 26px;background:rgba(18,15,12,.94);backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--rule)}
+.grp{display:flex;align-items:center;gap:8px}
+.grp>span{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--bone2)}
+button{font:inherit;font-size:12px;padding:5px 11px;background:#221d17;color:var(--bone);
+  border:1px solid var(--rule);border-radius:1px;cursor:pointer;transition:.12s}
+button:hover{border-color:var(--blue);color:#fff}
+button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#16130f;font-weight:700}
+button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+input[type=range]{width:132px;accent-color:var(--blue)}
+.val{color:var(--blue);font-size:11.5px;min-width:6ch}
+
+.scale{padding:18px 26px 4px}
+.scale h2,.grid h2{font-family:"Baskerville",Palatino,Georgia,serif;font-weight:400;font-size:19px;margin:0 0 2px}
+.scale p,.grid p.lead{margin:0 0 10px;color:var(--bone2);font-size:12.5px}
+#band{display:block;width:100%;height:auto;border:1px solid var(--rule)}
+
+.grid{padding:22px 26px 40px}
+.plates{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:22px;margin-top:14px}
+.plate{border:1px solid var(--rule);background:linear-gradient(180deg,#1c1813,#161310)}
+.plate.pick{border-color:var(--warn);box-shadow:0 0 0 1px var(--warn) inset}
+.cap{display:flex;align-items:baseline;gap:10px;padding:10px 13px 8px;border-bottom:1px solid var(--rule)}
+.cap .n{font-family:"Baskerville",Palatino,Georgia,serif;font-size:26px;color:var(--warn);line-height:1}
+.cap h3{font-family:"Baskerville",Palatino,Georgia,serif;font-weight:400;font-size:18px;margin:0}
+.cap em{font-style:normal;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--bone2);margin-left:auto}
+.stagewrap{position:relative}
+.stagewrap canvas{display:block;width:100%;height:auto}
+.desc{padding:9px 13px;color:var(--bone2);font-size:12px;min-height:3.4em;border-top:1px solid var(--rule)}
+.desc b{color:var(--bone)}
+/* bande chronophotographique */
+.strip{display:grid;grid-template-columns:repeat(8,1fr);border-top:1px solid var(--rule)}
+.strip div{position:relative;border-right:1px solid var(--rule)}
+.strip div:last-child{border-right:0}
+.strip canvas{display:block;width:100%;height:auto}
+.strip span{position:absolute;bottom:2px;left:4px;font-size:9px;color:#6d6455}
+.data{display:flex;gap:14px;padding:8px 13px;font-size:10.5px;color:var(--bone2);border-top:1px solid var(--rule)}
+.data b{color:var(--bone)}
+.keep{margin:0 13px 13px;width:calc(100% - 26px)}
+
+.notes{margin:0 26px 44px;padding:16px 20px;border-left:2px solid var(--blue);background:#1a1611}
+.notes h2{font-family:Baskerville,Palatino,Georgia,serif;font-weight:400;font-size:17px;margin:0 0 8px}
+.notes ul{margin:0;padding-left:18px;color:#b9ae9c;font-size:12.5px;line-height:1.8}
+.notes b{color:var(--bone)}
+@media (max-width:620px){header,.bar,.scale,.grid{padding-left:14px;padding-right:14px}
+  .notes{margin-left:14px;margin-right:14px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body>
+
+<header>
+  <div class="eyebrow">Planche II · locomotion · Rainbow Gallop</div>
+  <h1>L'allure de la licorne, <i>vue de dos</i></h1>
+  <p>Quatre façons d'animer les pattes de la variante 1. De dos, une foulée ne se lit pas au
+  déplacement latéral mais à la profondeur : la jambe qui revient vers nous grossit et s'éclaircit,
+  celle qui part devant se raccourcit, se replie et montre le dessous du sabot. La croupe roule.
+  C'est ce que testent ces quatre planches.</p>
+</header>
+
+<div class="bar">
+  <div class="grp"><span>Cadence</span><input type="range" id="cad" min="30" max="600" value="330">
+    <span class="val" id="cadv">3,3 c/s</span></div>
+  <div class="grp"><span>Fond</span>
+    <button data-bg="road">route</button><button data-bg="plate">planche</button></div>
+  <div class="grp"><button id="play" aria-pressed="true">lecture</button>
+    <input type="range" id="ph" min="0" max="99" value="0"></div>
+  <div class="grp"><button id="marey" aria-pressed="false">traînée</button>
+    <button id="guides" aria-pressed="false">repères</button></div>
+</div>
+
+<section class="scale">
+  <h2>À l'échelle du jeu</h2>
+  <p>Les quatre allures côte à côte, à la taille réelle en course. Si une foulée ne se lit pas ici, elle ne se lit pas.</p>
+  <canvas id="band" width="1600" height="330"></canvas>
+</section>
+
+<section class="grid">
+  <h2>Les quatre allures</h2>
+  <p class="lead">Chaque planche : l'animation en continu, puis la décomposition du cycle en huit temps.</p>
+  <div class="plates" id="plates"></div>
+</section>
+
+<section class="notes">
+  <h2>Ce que je regarde</h2>
+  <ul>
+    <li><b>La profondeur</b> — voit-on la jambe arrière venir vers nous, ou est-ce un piston vertical ?</li>
+    <li><b>Le roulis de la croupe</b> — les deux masses doivent monter et descendre en alternance.</li>
+    <li><b>Le dessous du sabot</b> — quand la jambe se replie devant, on doit apercevoir la sole.</li>
+    <li><b>Le nombre de temps</b> — à taille réelle et à 3 cycles par seconde, un cycle trop détaillé se perd.</li>
+    <li><b>Le coût</b> — la table de poses disparaît : tout est procédural, piloté par la vitesse.</li>
+  </ul>
+</section>
+
+<script>
+"use strict";
+// =====================================================================
+//  PLANCHE II — quatre allures pour la licorne vue de dos (variante 1).
+//  Repere logique : 200 x 300, sol y=288, axe de symetrie x=100.
+// =====================================================================
+var TAU=6.2832, LW=200, LH=300, GY=288, CX=100;
+var SK={horn:14,ear:26,head:56,hrx:20,hry:22,neck0:120,neck1:78,
+        wit:118,back:146,croup:176,crx:54,cry:40,lobe:22,lrx:27,lry:37,
+        hock:248,hockX:34,hoofX:20};
+function hsl(h,s,l,a){ return 'hsla('+h+','+s+'%,'+l+'%,'+(a==null?1:a)+')'; }
+function E(g,x,y,rx,ry,r){ g.beginPath(); g.ellipse(x,y,Math.abs(rx),Math.abs(ry),r||0,0,TAU); }
+function EF(g,x,y,rx,ry,r,c){ E(g,x,y,rx,ry,r); g.fillStyle=c; g.fill(); }
+function L(g,x0,y0,x1,y1,w,c){ g.lineCap='round'; g.strokeStyle=c; g.lineWidth=w;
+  g.beginPath(); g.moveTo(x0,y0); g.lineTo(x1,y1); g.stroke(); }
+function Q(g,x0,y0,cx,cy,x1,y1,w,c){ g.lineCap='round'; g.strokeStyle=c; g.lineWidth=w;
+  g.beginPath(); g.moveTo(x0,y0); g.quadraticCurveTo(cx,cy,x1,y1); g.stroke(); }
+function P(g,pts,c){ g.beginPath(); g.moveTo(pts[0],pts[1]);
+  for(var i=2;i<pts.length;i+=2) g.lineTo(pts[i],pts[i+1]); g.closePath(); g.fillStyle=c; g.fill(); }
+function sin(a){ return Math.sin(a*TAU); }   // sinus en tours
+
+// ---------------------------------------------------------------------
+//  Une foulee elementaire, vue de dos.
+//  Rend {h, sw} : h = hauteur du sabot (0 au sol, 1 au plus haut)
+//                 sw = profondeur (-1 tendue vers nous, +1 repliee devant)
+// ---------------------------------------------------------------------
+function stride(t,stance,amp,reach){
+  t-=Math.floor(t);
+  if(t<stance){                                   // appui : le sabot colle au sol
+    var u=t/stance;
+    return {h:0, sw:reach*0.4-u*reach*1.4, fold:0};
+  }
+  var v=(t-stance)/(1-stance);                    // suspension : monte, replie, revient devant
+  return {h:Math.sin(v*Math.PI)*amp, sw:-reach+v*reach*1.4, fold:Math.sin(v*Math.PI)};
+}
+
+// ---------------------------------------------------------------------
+//  Les quatre allures. Chacune rend l'etat cinematique complet.
+// ---------------------------------------------------------------------
+function gGalop(t){                 // 1. galop transversal : les postérieurs en couplet
+  var l=stride(t,0.3,1.15,1.15), r=stride(t+0.18,0.3,1.15,1.15);
+  var air=(l.h+r.h)/2;
+  return {l:l,r:r, lift:-air*13-2, tilt:(l.h-r.h)*5.5, sway:(r.sw-l.sw)*1.6,
+    squash:1+air*0.05, front:[stride(t+0.5,0.3,.8,.8),stride(t+0.62,0.3,.8,.8)]};
+}
+function gTrot(t){                  // 2. trot : deux temps, parfaitement alterne
+  var l=stride(t,0.5,0.72,0.8), r=stride(t+0.5,0.5,0.72,0.8);
+  return {l:l,r:r, lift:-Math.abs(sin(t))*6-1, tilt:(l.h-r.h)*7,
+    sway:(r.sw-l.sw)*1.1, squash:1, front:[stride(t+0.5,0.5,.6,.6),stride(t,0.5,.6,.6)]};
+}
+function gBond(t){                  // 3. bond : les deux postérieurs ensemble, cartoon
+  var s=stride(t,0.26,1.25,1.15), air=s.h;
+  var sq=1+Math.sin(Math.min(1,t*6)*Math.PI)*0.09;
+  return {l:s,r:{h:s.h*0.92,sw:s.sw*0.94,fold:s.fold}, lift:-air*22-1, tilt:sin(t)*1.5,
+    sway:-s.sw*2.4, squash:air>0.05?1-air*0.06:sq, front:[stride(t+0.1,0.26,1.1,1),stride(t+0.16,0.26,1.1,1)]};
+}
+function gFlotte(t){                // 4. course flottante : foulée ample, corps stable
+  var l=stride(t,0.3,0.5,1.75), r=stride(t+0.5,0.3,0.5,1.75);
+  return {l:l,r:r, lift:sin(t*2)*2-6, tilt:(l.sw-r.sw)*1.6,
+    sway:(r.sw-l.sw)*2.2, squash:1, front:[stride(t+0.45,0.4,.5,1),stride(t+0.95,0.4,.5,1)]};
+}
+
+// ---------------------------------------------------------------------
+//  Rendu de la licorne (variante 1 « étude anatomique »)
+// ---------------------------------------------------------------------
+function leg(g,o,k,side,s,tone){
+  // profondeur : sw<0 = jambe vers nous -> plus large, plus claire, sabot plus bas
+  var near=1-s.sw*0.24, lig=-s.sw*10;
+  var hipX=CX+side*20, hipY=SK.croup+14+k.lift;
+  var hockX=CX+side*(SK.hockX+s.sw*2)*near, hockY=SK.hock-s.h*30+k.lift*0.5;
+  var hoofX=CX+side*(SK.hoofX+s.sw*3)*near, hoofY=GY-4-s.h*58-s.sw*7+k.lift*0.2;
+  var wT=25*near, wC=13*near;
+  L(g,hipX,hipY,hockX,hockY,wT,hsl(o.h,o.s,tone.thigh+lig));
+  L(g,hockX,hockY,hoofX,hoofY,wC,hsl(o.h,o.s,tone.cannon+lig));
+  if(s.fold>0.45){                       // repliée : on voit le dessous du sabot
+    EF(g,hoofX,hoofY,9*near,7.4*near,0,'#2e2634');
+    EF(g,hoofX,hoofY,5.6*near,4.5*near,0,'#b9a89c');
+    EF(g,hoofX,hoofY+0.6*near,3*near,2.4*near,0,'#8d7d74');
+  } else {
+    EF(g,hoofX,hoofY,7.6*near,6*near,0,'#39303f');
+    EF(g,hoofX,hoofY-3,7*near,3*near,0,hsl(o.h,o.s,tone.cannon+lig-6));
+  }
+}
+function drawUni(g,o,k){
+  var i, A=hsl(o.h,o.s,96), B=hsl(o.h,o.s,88), M=hsl(o.h,o.s,79),
+      D=hsl(o.h,o.s,64), S=hsl(o.h,o.s,52), d=k.lift, t=k.tilt, sq=k.squash||1;
+  g.save(); g.translate(CX,SK.croup); g.scale(1/Math.sqrt(sq),sq); g.translate(-CX,-SK.croup);
+  // antérieurs entrevus, plus loin donc plus haut et plus sombres
+  L(g,95,SK.croup+52+d,94-k.front[0].sw*2,258-k.front[0].h*18,7,S);
+  L(g,107,SK.croup+52+d,108-k.front[1].sw*2,254-k.front[1].h*18,7,S);
+  leg(g,o,k,-1,k.l,{thigh:70,cannon:52});
+  leg(g,o,k, 1,k.r,{thigh:70,cannon:52});
+  EF(g,CX,SK.croup+34+d,32,13,0,hsl(o.h,o.s,56,.55));
+  // encolure et tête
+  P(g,[CX-21,SK.neck0+d,CX+21,SK.neck0+d,CX+15,SK.neck1+d,CX-15,SK.neck1+d],B);
+  P(g,[CX-8,SK.neck0+d,CX+8,SK.neck0+d,CX+6,SK.neck1+d,CX-6,SK.neck1+d],A);
+  EF(g,CX,SK.head+d,SK.hrx,SK.hry,0,B);
+  EF(g,CX-15,SK.head+8+d,9,12,-0.3,M); EF(g,CX+15,SK.head+8+d,9,12,0.3,M);
+  P(g,[CX-12,SK.ear+16+d,CX-23,SK.ear-10+d,CX-3,SK.ear+8+d],B);
+  P(g,[CX+12,SK.ear+16+d,CX+23,SK.ear-10+d,CX+3,SK.ear+8+d],B);
+  P(g,[CX-13,SK.ear+12+d,CX-19,SK.ear-4+d,CX-7,SK.ear+8+d],hsl(340,38,70));
+  P(g,[CX+13,SK.ear+12+d,CX+19,SK.ear-4+d,CX+7,SK.ear+8+d],hsl(340,38,70));
+  var hg=g.createLinearGradient(CX-5,SK.ear+18+d,CX+5,SK.horn+d);
+  hg.addColorStop(0,'#c98f2e'); hg.addColorStop(.5,'#ffd97a'); hg.addColorStop(1,'#fff6d8');
+  P(g,[CX-6,SK.ear+18+d,CX+6,SK.ear+18+d,CX+1,SK.horn+d],hg);
+  for(i=0;i<4;i++) L(g,CX-5+i*1.2,SK.ear+12+d-i*7,CX+5-i*1.4,SK.ear+9+d-i*7,1.5,'rgba(150,105,30,.45)');
+  // corps
+  EF(g,CX,SK.wit+d,27,20,0,hsl(o.h,o.s,86));
+  EF(g,CX,SK.back+d,35,26,0,hsl(o.h,o.s,84));
+  var gr=g.createLinearGradient(0,SK.croup-40+d,0,SK.croup+40+d);
+  gr.addColorStop(0,A); gr.addColorStop(.42,B); gr.addColorStop(1,D);
+  EF(g,CX,SK.croup+d,SK.crx,SK.cry,0,gr);
+  EF(g,CX-SK.lobe,SK.croup+4+d+t,SK.lrx,SK.lry,-0.05,hsl(o.h,o.s,90));
+  EF(g,CX+SK.lobe,SK.croup+4+d-t,SK.lrx,SK.lry,0.05,hsl(o.h,o.s,90));
+  EF(g,CX-SK.lobe-4,SK.croup-12+d+t,17,20,-0.1,hsl(o.h,o.s,97,.6));
+  EF(g,CX+SK.lobe+4,SK.croup-12+d-t,17,20,0.1,hsl(o.h,o.s,97,.6));
+  Q(g,CX,SK.croup-36+d,CX,SK.croup+d,CX,SK.croup+34+d,6,hsl(o.h,o.s,68,.55));
+  // crinière (retombe à gauche) et queue (colonne centrale)
+  for(i=0;i<8;i++){ var y=SK.ear+18+i*8+d;
+    Q(g,CX-1,y,CX-8-i*1.1+k.sway*0.7,y+7,CX-10-i*1.5+k.sway,y+15,5-i*0.1,hsl(i*40,82,60)); }
+  EF(g,CX,SK.croup-32+d,7,6,0,hsl(o.h,o.s,70));
+  for(i=0;i<11;i++){ var ox=(i-5)*2.6;
+    Q(g,CX+ox*0.14,SK.croup-34+d, CX+ox*0.58+k.sway*1.6,SK.croup+18,
+      CX+ox*0.95+k.sway*2.6,SK.croup+86-Math.abs(i-5)*3-k.lift*0.5,5.5,hsl(i*33,84,62)); }
+  for(i=0;i<7;i++) Q(g,CX+(i-3)*1.4,SK.croup-28+d,CX+(i-3)*3+k.sway*1.6,SK.croup+22,
+    CX+(i-3)*5+k.sway*2.4,SK.croup+70,1.2,'rgba(255,255,255,.34)');
+  g.restore();
+}
+
+// ---------------------------------------------------------------------
+var GAITS=[
+ {f:gGalop, n:"Galop transversal", tag:"4 temps",
+  d:"Les deux postérieurs se posent en <b>couplet</b>, puis se replient ensemble pendant la suspension. Le plus juste anatomiquement, et le plus proche de la photo."},
+ {f:gTrot, n:"Trot", tag:"2 temps",
+  d:"Alternance parfaite, corps stable. Très lisible et très régulier, mais une licorne au trot ne <b>court</b> pas : ça peut manquer d'urgence à 366 km/h."},
+ {f:gBond, n:"Bond groupé", tag:"1 temps",
+  d:"Les deux postérieurs poussent ensemble, gros <b>écrasement-étirement</b> du corps. Cartoon assumé, énorme amplitude verticale, se lit même minuscule."},
+ {f:gFlotte, n:"Course flottante", tag:"suspension longue",
+  d:"Foulée très ample, corps qui reste haut et stable : la licorne <b>plane</b> plus qu'elle ne frappe le sol. Colle au registre magique de la route arc-en-ciel."}
+];
+var ROBE={h:300,s:14};
+
+// --- etat -------------------------------------------------------------
+var st={bg:'road',cad:3.3,play:true,ph:0,marey:false,guides:false}, T=0;
+function mk(w,h){ var c=document.createElement('canvas'); c.width=w; c.height=h; return c; }
+var tmp=mk(LW,LH), tg=tmp.getContext('2d');
+
+function paint(g,gi,scale,phase,alpha){
+  tg.setTransform(1,0,0,1,0,0); tg.clearRect(0,0,LW,LH);
+  drawUni(tg,ROBE,GAITS[gi].f(phase));
+  g.save(); if(alpha!=null) g.globalAlpha=alpha;
+  g.drawImage(tmp,0,0,LW,LH,0,0,LW*scale,LH*scale); g.restore();
+}
+function bgPlate(g,w,h){ g.fillStyle='#1b1712'; g.fillRect(0,0,w,h);
+  g.strokeStyle='rgba(255,255,255,.05)'; g.lineWidth=1;
+  for(var x=0;x<w;x+=24){ g.beginPath(); g.moveTo(x+.5,0); g.lineTo(x+.5,h); g.stroke(); } }
+function bgRoad(g,w,h,t){
+  var gr=g.createLinearGradient(0,0,0,h);
+  gr.addColorStop(0,'#2a1055'); gr.addColorStop(.3,'#a83c93'); gr.addColorStop(.38,'#ffc389');
+  gr.addColorStop(.42,'#f3d9ff'); gr.addColorStop(1,'#6b3fa8');
+  g.fillStyle=gr; g.fillRect(0,0,w,h);
+  var hz=h*0.38, i, n=22;
+  for(i=n;i>=0;i--){
+    var q0=i/n,q1=(i+1)/n, y0=hz+(h-hz)*q0*q0, y1=hz+(h-hz)*q1*q1;
+    var w0=w*0.07+w*0.6*q0*q0, w1=w*0.07+w*0.6*q1*q1;
+    var hue=((i>>1)*51.4+t*18)%360, alt=(i>>1)&1;
+    g.fillStyle=hsl(hue,92,alt?58:49);
+    g.beginPath(); g.moveTo(w/2-w1,y1); g.lineTo(w/2-w0,y0);
+    g.lineTo(w/2+w0,y0); g.lineTo(w/2+w1,y1); g.fill();
+  }
+}
+function drawBg(g,w,h,t){ if(st.bg==='plate') bgPlate(g,w,h); else bgRoad(g,w,h,t); }
+function guides(g,w,h,sc,oy){
+  if(!st.guides) return;
+  g.save(); g.strokeStyle='rgba(143,168,189,.55)'; g.setLineDash([4,4]); g.lineWidth=1;
+  var yg=oy+GY*sc, yh=oy+SK.hock*sc, yc=oy+SK.croup*sc;
+  [[yg,'sol'],[yh,'jarret'],[yc,'croupe']].forEach(function(e){
+    g.beginPath(); g.moveTo(0,e[0]+.5); g.lineTo(w,e[0]+.5); g.stroke(); });
+  g.setLineDash([]); g.font='9px ui-monospace,monospace'; g.fillStyle='rgba(143,168,189,.8)';
+  g.fillText('sol',4,yg-3); g.fillText('jarret',4,yh-3); g.fillText('croupe',4,yc-3);
+  g.restore();
+}
+
+// --- bandeau echelle jeu ----------------------------------------------
+var band=document.getElementById('band'), bx=band.getContext('2d');
+function drawBand(){
+  var w=band.width, h=band.height; drawBg(bx,w,h,T);
+  var sc=(h*0.72)/LH, i, oy=h*0.94-LH*sc;
+  guides(bx,w,h,sc,oy);
+  for(i=0;i<4;i++){
+    var x=w*(i+0.5)/4-LW*sc/2;
+    bx.save(); bx.translate(x,oy); paint(bx,i,sc,st.ph/100); bx.restore();
+    bx.font='700 15px ui-monospace,monospace'; bx.textAlign='center';
+    bx.fillStyle='rgba(0,0,0,.5)'; bx.fillText(GAITS[i].n,w*(i+0.5)/4+1,h-9);
+    bx.fillStyle='#fff'; bx.fillText(GAITS[i].n,w*(i+0.5)/4,h-10);
+  }
+}
+
+// --- planches ----------------------------------------------------------
+var plates=document.getElementById('plates'), cards=[];
+GAITS.forEach(function(G,i){
+  var el=document.createElement('article'); el.className='plate';
+  var src=G.f.toString()+stride.toString();
+  var cost=src.replace(/\s*\/\/.*$/gm,'').replace(/\s+/g,' ').length;
+  var cells='';
+  for(var k=0;k<8;k++) cells+='<div><canvas></canvas><span>'+(k+1)+'</span></div>';
+  el.innerHTML='<div class="cap"><span class="n">'+(i+1)+'</span><h3>'+G.n+'</h3><em>'+G.tag+'</em></div>'+
+    '<div class="stagewrap"><canvas></canvas></div>'+
+    '<p class="desc">'+G.d+'</p>'+
+    '<div class="strip">'+cells+'</div>'+
+    '<div class="data"><span>allure <b>~'+cost+' o</b></span><span>poses stockées <b>0</b></span>'+
+    '<span>pilotée par <b>la vitesse</b></span></div>'+
+    '<button class="keep">garder cette allure</button>';
+  plates.appendChild(el);
+  var big=el.querySelector('.stagewrap canvas');
+  var cells2=[].slice.call(el.querySelectorAll('.strip canvas'));
+  cards.push({el:el,big:big,g:big.getContext('2d'),cells:cells2,cg:cells2.map(function(c){return c.getContext('2d');})});
+  el.querySelector('.keep').addEventListener('click',function(){
+    cards.forEach(function(c){ c.el.classList.remove('pick'); });
+    el.classList.add('pick'); el.querySelector('.keep').textContent='choisie — allure '+(i+1);
+  });
+});
+function drawPlates(){
+  cards.forEach(function(c,i){
+    var W=460, H=380;
+    if(c.big.width!==W){ c.big.width=W; c.big.height=H; }
+    var g=c.g; drawBg(g,W,H,T);
+    var sc=(H*0.82)/LH, oy=H*0.96-LH*sc, ox=W/2-LW*sc/2;
+    guides(g,W,H,sc,oy);
+    if(st.marey) for(var m=4;m>0;m--){        // traînée : positions successives
+      g.save(); g.translate(ox-m*9,oy); paint(g,i,sc,st.ph/100-m*0.055,0.13+m*0.02); g.restore(); }
+    g.save(); g.translate(ox,oy); paint(g,i,sc,st.ph/100); g.restore();
+    c.cg.forEach(function(cg,k){
+      var cw=170, ch=200;
+      if(c.cells[k].width!==cw){ c.cells[k].width=cw; c.cells[k].height=ch; }
+      cg.fillStyle=(Math.floor(st.ph/12.5)===k)?'#2b2419':'#191510';
+      cg.fillRect(0,0,cw,ch);
+      var s2=(ch*0.86)/LH;
+      cg.save(); cg.translate(cw/2-LW*s2/2,ch*0.98-LH*s2); paint(cg,i,s2,k/8); cg.restore();
+    });
+  });
+}
+
+// --- controles ---------------------------------------------------------
+function press(el,v){ el.setAttribute('aria-pressed',v); }
+[].forEach.call(document.querySelectorAll('[data-bg]'),function(b){
+  b.addEventListener('click',function(){ st.bg=b.dataset.bg;
+    [].forEach.call(document.querySelectorAll('[data-bg]'),function(o){ press(o,o.dataset.bg===st.bg); }); }); });
+[].forEach.call(document.querySelectorAll('[data-bg]'),function(o){ press(o,o.dataset.bg===st.bg); });
+var cad=document.getElementById('cad'), cadv=document.getElementById('cadv');
+cad.addEventListener('input',function(){ st.cad=cad.value/100;
+  cadv.textContent=st.cad.toFixed(1).replace('.',',')+' c/s'; });
+var playB=document.getElementById('play'), phIn=document.getElementById('ph');
+playB.addEventListener('click',function(){ st.play=!st.play; press(playB,st.play);
+  playB.textContent=st.play?'lecture':'pause'; });
+phIn.addEventListener('input',function(){ st.play=false; press(playB,false);
+  playB.textContent='pause'; st.ph=+phIn.value; });
+var mB=document.getElementById('marey'), gB=document.getElementById('guides');
+mB.addEventListener('click',function(){ st.marey=!st.marey; press(mB,st.marey); });
+gB.addEventListener('click',function(){ st.guides=!st.guides; press(gB,st.guides); });
+
+// --- boucle ------------------------------------------------------------
+var last=0;
+function loop(ts){
+  var dt=Math.min(.05,(ts-last)/1000)||0; last=ts; T+=dt;
+  if(st.play){ st.ph=(st.ph+st.cad*dt*100)%100; phIn.value=st.ph|0; }
+  drawBand(); drawPlates(); requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script></body></html>

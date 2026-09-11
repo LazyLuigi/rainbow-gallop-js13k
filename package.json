@@ -1,0 +1,20 @@
+{
+  "name": "rainbow-gallop",
+  "version": "1.0.0",
+  "description": "A unicorn race down a rainbow road, in 13 kilobytes. js13kGames 2026 entry.",
+  "private": true,
+  "scripts": {
+    "build": "bash build.sh src/index.html",
+    "test": "node tools/test.js",
+    "harmony": "node tools/harmony.js",
+    "skill": "node tools/skill.js",
+    "music": "node tools/music.js",
+    "check": "node tools/test.js && node tools/harmony.js",
+    "build:best": "RRBEST=8 bash build.sh src/index.html",
+    "build:fast": "FAST=1 bash build.sh src/index.html"
+  },
+  "devDependencies": {
+    "roadroller": "^2.1.0",
+    "terser": "^5.31.0"
+  }
+}

@@ -1,0 +1,16 @@
+node_modules/
+dist/
+*.zip
+.build/
+.js13k-check/
+.gen-img/
+*.log
+.DS_Store
+
+media/.js13k-images/
+
+# Le .gitignore global de la machine exclut package-lock.json. Ici il doit etre
+# versionne : le reglement js13k demande un depot public dont le jeu se
+# reconstruit, et le lockfile est ce qui fige les versions de terser et
+# roadroller.
+!package-lock.json
