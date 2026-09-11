@@ -1,11 +1,11 @@
-// Recette de l'integration Wavedash, jouee sur la SORTIE TERSER et non sur la
-// source : c'est terser qui reecrit le code, donc c'est lui qui peut casser un
-// appel d'API sans que rien n'apparaisse dans la console.
+// Acceptance test for the Wavedash integration, run against the TERSER OUTPUT
+// rather than the source: terser is what rewrites the code, so terser is what
+// can break an API call without a word in the console.
 //
-// Le stub imite la seule chose qui compte ici : le SDK Wavedash valide le type
-// de ses arguments et leve sur un type inattendu. Un stub permissif ne testerait
-// rien -- il accepterait `setAchievement(id, 1)` la ou le vrai SDK refuse.
-// Voir le piege `booleans_as_integers` documente dans le README.
+// The stub imitates the one thing that matters here: the Wavedash SDK validates
+// its argument types and throws on an unexpected one. A permissive stub would
+// test nothing -- it would accept `setAchievement(id, 1)` where the real SDK
+// refuses it. See the `booleans_as_integers` trap documented in the README.
 //
 //   node tools/test-wavedash.js [src/index.html]
 const fs = require('fs');
@@ -16,22 +16,22 @@ const srcPath = process.argv[2] || path.join(__dirname, '..', 'src', 'index.html
 const html = fs.readFileSync(srcPath, 'utf8');
 const rawJs = html.match(/<script>([\s\S]*)<\/script>/)[1];
 
-// Memes options que build.sh, mangle toplevel en moins : il renomme les
-// fonctions du jeu, ce qui empeche de les appeler depuis le test. Il ne change
-// pas la semantique qu'on verifie ici.
+// Same options as build.sh, minus toplevel mangling: it renames the game's
+// functions, which stops the test calling them. It does not change the
+// semantics being checked here.
 const tmp = path.join(require('os').tmpdir(), 'wd-in-' + process.pid + '.js');
 const out = path.join(require('os').tmpdir(), 'wd-out-' + process.pid + '.js');
 fs.writeFileSync(tmp, rawJs);
 const terser = ['./node_modules/.bin/terser', 'terser'].find(p => { try { execFileSync(p, ['--version'], {stdio:'ignore'}); return true; } catch (e) { return false; } });
-if (!terser) { console.error('terser introuvable : npm install'); process.exit(1); }
+if (!terser) { console.error('terser not found: npm install'); process.exit(1); }
 execFileSync(terser, [tmp, '-c', 'passes=3,unsafe=true', '-o', out]);
 const minJs = fs.readFileSync(out, 'utf8');
 fs.unlinkSync(tmp); fs.unlinkSync(out);
-console.log('JS terse pour le test :', minJs.length, 'octets');
+console.log('JS terse for the test:', minJs.length, 'bytes');
 
 const stub = require('./stub.js');
 
-// --- le faux SDK, aussi severe que le vrai -------------------------------
+// --- the fake SDK, as strict as the real one ------------------------------
 function makeSdk(opts) {
   opts = opts || {};
   const log = { calls: [], typeErrors: [] };
@@ -57,7 +57,7 @@ function makeSdk(opts) {
     setAchievement(id, storeNow) {
       vStr(id, 'setAchievement.identifier'); vBool(storeNow, 'setAchievement.storeNow');
       log.calls.push('setAchievement:' + id);
-      if (!known.has(id)) return false;          // le vrai SDK ignore un id inconnu, sans un mot
+      if (!known.has(id)) return false;          // the real SDK ignores an unknown id, silently
       unlocked.add(id); return true;
     },
     getOrCreateLeaderboard(name, sort, display) {
@@ -65,7 +65,7 @@ function makeSdk(opts) {
       log.calls.push('getOrCreateLeaderboard:' + name);
       if (opts.lbFail) return Promise.resolve({ success: false });
       if (opts.lbReject) return Promise.reject(new Error('boom'));
-      // La forme exacte des types generes : `id`, jamais `_id`.
+      // The exact shape from the generated types: `id`, never `_id`.
       return Promise.resolve({ success: true, data: { id: 'lb-' + name, name, totalEntries: 0, created: true } });
     },
     uploadLeaderboardScore(id, score, keepBest) {
@@ -98,31 +98,31 @@ function run(label, sdkOpts, after) {
 }
 
 let fails = 0;
-function check(cond, msg) { console.log((cond ? '  OK   ' : '  ECHEC') + '  ' + msg); if (!cond) fails++; }
+function check(cond, msg) { console.log((cond ? '  OK   ' : '  FAIL ') + '  ' + msg); if (!cond) fails++; }
 
-console.log('\n1. plateforme presente : init() doit partir, sans type invalide');
+console.log('\n1. platform present: init() must fire, with no invalid type');
 {
   const r = run('present', { known: [] });
-  check(!r.thrown, 'le jeu se charge sans lever' + (r.thrown ? ' (' + r.thrown.message + ')' : ''));
-  check(r.log.calls.includes('init'), 'init() appele');
-  check(r.log.typeErrors.length === 0, 'aucun argument de type invalide' +
+  check(!r.thrown, 'the game loads without throwing' + (r.thrown ? ' (' + r.thrown.message + ')' : ''));
+  check(r.log.calls.includes('init'), 'init() called');
+  check(r.log.typeErrors.length === 0, 'no argument of an invalid type' +
     (r.log.typeErrors.length ? ' -> ' + r.log.typeErrors.join(', ') : ''));
 }
 
-console.log('\n2. hors plateforme : le global est absent, rien ne doit casser');
+console.log('\n2. off platform: the global is absent, nothing may break');
 {
   const r = run('absent', null);
-  check(!r.thrown, 'le jeu se charge sans lever' + (r.thrown ? ' (' + r.thrown.message + ')' : ''));
-  check(r.consoleErrors.length === 0, 'aucune erreur console');
+  check(!r.thrown, 'the game loads without throwing' + (r.thrown ? ' (' + r.thrown.message + ')' : ''));
+  check(r.consoleErrors.length === 0, 'no console error');
 }
 
-console.log('\n3. SDK casse : methodes absentes, promesses rejetees');
+console.log('\n3. broken SDK: missing methods, rejected promises');
 {
   const r = run('missing', { known: [], missing: ['requestStats', 'getAchievement', 'setAchievement'] });
-  check(!r.thrown, 'methodes manquantes : le jeu se charge quand meme');
+  check(!r.thrown, 'missing methods: the game still loads');
   const r2 = run('reject', { known: [], statsReject: true, lbReject: true, upReject: true });
-  check(!r2.thrown, 'promesses rejetees : le jeu se charge quand meme');
+  check(!r2.thrown, 'rejected promises: the game still loads');
 }
 
-console.log('\n' + (fails ? fails + ' ECHEC(S)' : 'TOUS LES TESTS WAVEDASH PASSENT'));
+console.log('\n' + (fails ? fails + ' FAILURE(S)' : 'ALL WAVEDASH TESTS PASS'));
 process.exit(fails ? 1 : 0);

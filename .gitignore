@@ -4,13 +4,21 @@ dist/
 .build/
 .js13k-check/
 .gen-img/
+media/.js13k-images/
 *.log
 .DS_Store
 
-media/.js13k-images/
+# Outside the submission: design studies, the comparison variant, tools whose
+# job is done, and the full-resolution originals of the artwork. Kept locally,
+# not in the public repo.
+labs/
+src/index-nofx.html
+tools/harmony.js
+tools/skill.js
+tools/music.js
+media/*-source.png
 
-# Le .gitignore global de la machine exclut package-lock.json. Ici il doit etre
-# versionne : le reglement js13k demande un depot public dont le jeu se
-# reconstruit, et le lockfile est ce qui fige les versions de terser et
-# roadroller.
+# The machine's global gitignore excludes package-lock.json. Here it has to be
+# versioned: the js13k rules ask for a public repo the game rebuilds from, and
+# the lockfile is what pins the terser and roadroller versions.
 !package-lock.json

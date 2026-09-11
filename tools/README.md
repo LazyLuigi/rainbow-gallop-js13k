@@ -1,27 +1,23 @@
-# Outils
+# Tools
 
-Aucun ne demande de dependance native : `stub.js` fournit un DOM et un contexte
-canvas 2D factices, ce qui suffit a executer le jeu entier sous node.
+None of these needs a native dependency: `stub.js` provides a fake DOM and 2D
+canvas context, which is enough to run the whole game under node.
 
-| script       | ce qu'il verifie                                                         |
-|--------------|--------------------------------------------------------------------------|
-| `test.js`    | geometrie du circuit, physique, course complete, rendu, chute hors piste |
-| `harmony.js` | chaque note de la musique embarquee tombe juste sur son accord           |
-| `skill.js`   | equilibrage : 4 niveaux de pilote, place finale et ecarts                |
-| `music.js`   | analyse des 6 morceaux du lab `labs/03-music-tracks.html`                |
-| `test-wavedash.js` | l'integration Wavedash sur la sortie terser, avec un SDK qui valide ses types |
+| script             | what it checks                                                      |
+|--------------------|---------------------------------------------------------------------|
+| `test.js`          | track geometry, physics, a full race, rendering, falling off the road |
+| `test-wavedash.js` | the Wavedash integration, on the terser output, against an SDK that validates its argument types |
 
-`drive-gif.js` n'est pas un test : c'est le pilote automatique du harnais de
-capture (`record-gif.py` du skill js13k-finalize). Il est appele une fois par
-image et ecrit directement dans l'objet `keys` que lit `playerStep()`, plutot
-que de simuler des evenements clavier. Il tient la voie de sa couleur, saute
-les haies, vise les anneaux et les boites. C'est lui qui produit
-`media/gameplay.gif`, de facon reproductible a l'octet pres.
+`drive-gif.js` is not a test: it is the autopilot for the capture harness
+(`record-gif.py`). It is called once per frame and writes straight into the
+`keys` object that `playerStep()` reads, rather than faking keyboard events. It
+holds the lane matching its colour, jumps hurdles, and aims for rings and item
+boxes. It is what produces `media/gameplay.gif`, reproducibly down to the byte.
 
-Chacun accepte un chemin en argument, par defaut `src/index.html` :
+Each test takes an optional path, defaulting to `src/index.html`:
 
-    node tools/test.js src/index-nofx.html
+    node tools/test.js src/index.html
 
-Le contexte factice leve une erreur des qu'une valeur non finie (NaN, Infinity)
-est affectee au canvas. C'est ce qui attrape les divisions par zero de la
-projection avant qu'elles n'atteignent l'ecran.
+The fake context throws as soon as a non-finite value (NaN, Infinity) is
+assigned to the canvas. That is what catches the divide-by-zero cases in the
+projection before they reach the screen.

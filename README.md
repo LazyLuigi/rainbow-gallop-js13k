@@ -64,14 +64,13 @@ Requires `node`, `zip`, and network access on the first run so that `terser` and
 npm run build          # -> js13k-game.zip, dist/js13k/, dist/wavedash/
 npm run build:best     # same, keeping the smallest of 8 roadroller draws
 npm test               # track geometry, physics, a full race, rendering, edge cases
-npm run harmony        # every melody note against its chord
-npm run skill          # balance: four driver skill levels
+npm run wavedash       # the Wavedash integration, on the terser output
+npm run check          # both test suites
 ```
 
 `build.sh` extracts the script, runs it through terser, packs it with roadroller,
 zips, recompresses the container with `advzip` when it is installed, and prints
-the remaining budget. It takes the source path as its argument, so
-`bash build.sh src/index-nofx.html` works too.
+the remaining budget. It takes the source path as its argument.
 
 Two knobs, both environment variables:
 
@@ -79,10 +78,10 @@ Two knobs, both environment variables:
   parameter search is random: on this source, successive draws ranged from
   16,431 to 16,475 bytes. **The zip size is not reproducible from one build to
   the next** — read the number the build just printed, never one written down.
-- `RRSEL=n` sets the number of roadroller contexts. Fewer contexts means a
-  bigger zip but a much faster decode at load time, which matters because the
-  submission site now runs every uploaded zip in a resource-constrained
-  Chromium. Measured on this game, after advzip:
+- `RRSEL=n` sets the number of roadroller contexts, and defaults to 9 here.
+  Fewer contexts means a bigger zip but a much faster decode at load time,
+  which matters because the submission site now runs every uploaded zip in a
+  resource-constrained Chromium. Measured on this game, after advzip:
 
   | contexts | zip | startup, CPU throttled 8x |
   |---|---|---|
@@ -123,8 +122,6 @@ zip. That option is deliberately absent from `build.sh`.
 
 ```
 src/index.html           the game, readable and commented
-src/index-nofx.html      same game without the three speed-feedback effects,
-                         kept only to compare; not part of the submission
 build.sh                 the build chain
 wavedash.toml            Wavedash deployment config
 js13k-game.zip           the submission archive (generated, not committed)
@@ -132,12 +129,7 @@ dist/js13k/index.html    compressed page, the one inside the zip (generated)
 dist/wavedash/index.html unminified page for Wavedash (generated)
 media/                   gameplay GIF, submission cover and thumbnail
 tools/                   test harnesses, see tools/README.md
-labs/                    design studies used to choose the art and music
 ```
-
-The three labs are standalone pages that were used to pick a direction before
-committing bytes: six unicorn drawing styles, four gallop animations, and six
-chiptune tracks with a record-crate selector and a live note roll.
 
 ## Technical notes
 
@@ -160,5 +152,3 @@ faster tempo on the final lap.
 If the frame rate drops below 38, the renderer drops bloom first, then reduces
 draw distance in steps down to 90 segments.
 
-The source comments are in French, which is the language the game was built in.
-Everything the player sees is in English.

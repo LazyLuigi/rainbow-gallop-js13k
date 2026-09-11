@@ -1,8 +1,8 @@
-// Bouchon DOM / canvas 2D minimal : permet d'executer le jeu sous node sans
-// dependance native. Le contexte est un Proxy qui compte les appels et leve une
-// erreur des qu'on lui affecte une valeur non finie (NaN, Infinity), ce qui
-// attrape les divisions par zero de la projection avant qu'elles n'atteignent
-// l'ecran. Aucun pixel n'est produit : pour un vrai rendu, voir README.
+// Minimal DOM / 2D canvas stub: enough to run the game under node with no
+// native dependency. The context is a Proxy that counts calls and throws as
+// soon as a non-finite value (NaN, Infinity) is assigned to it, which catches
+// the divide-by-zero cases in the projection before they reach the screen.
+// No pixel is produced: for real rendering, see README.
 const calls={};
 function ctx(){
   const h={};
@@ -14,18 +14,18 @@ function ctx(){
     if(n==='measureText') return {width:100};
   };
   return new Proxy(h,{get:(t,k)=>(k in t?t[k]:undefined), set:(t,k,v)=>{
-    if(typeof v==='number'&&!isFinite(v)) throw new Error('valeur non finie sur ctx.'+String(k)+': '+v);
+    if(typeof v==='number'&&!isFinite(v)) throw new Error('non-finite value on ctx.'+String(k)+': '+v);
     t[k]=v; return true; }});
 }
 function mkCanvas(){ return {width:1,height:1,style:{},getContext:()=>ctx(),
   addEventListener(){}, requestPointerLock(){}}; }
 
-// Installe les globales attendues par le jeu, puis renvoie le compteur d'appels.
+// Installs the globals the game expects, then returns the call counter.
 function install(W,H){
   const main=mkCanvas(); main.width=W||1280; main.height=H||720;
   global.document={ getElementById:()=>main, createElement:()=>mkCanvas(),
     head:{appendChild(){}}, addEventListener(){} };
-  global.window={}; global.self=global;   // le jeu lit self.Wavedash, absent sous node
+  global.window={}; global.self=global;   // the game reads self.Wavedash, absent under node
   global.innerWidth=main.width; global.innerHeight=main.height;
   global.devicePixelRatio=1; global.screen={};
   global.addEventListener=()=>{}; global.requestAnimationFrame=()=>{};
