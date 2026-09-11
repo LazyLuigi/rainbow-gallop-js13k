@@ -9,9 +9,10 @@
     "harmony": "node tools/harmony.js",
     "skill": "node tools/skill.js",
     "music": "node tools/music.js",
-    "check": "node tools/test.js && node tools/harmony.js",
+    "check": "node tools/test.js && node tools/harmony.js && node tools/test-wavedash.js",
     "build:best": "RRBEST=8 bash build.sh src/index.html",
-    "build:fast": "FAST=1 bash build.sh src/index.html"
+    "build:fast": "FAST=1 bash build.sh src/index.html",
+    "wavedash": "node tools/test-wavedash.js"
   },
   "devDependencies": {
     "roadroller": "^2.1.0",

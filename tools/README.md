@@ -9,6 +9,7 @@ canvas 2D factices, ce qui suffit a executer le jeu entier sous node.
 | `harmony.js` | chaque note de la musique embarquee tombe juste sur son accord           |
 | `skill.js`   | equilibrage : 4 niveaux de pilote, place finale et ecarts                |
 | `music.js`   | analyse des 6 morceaux du lab `labs/03-music-tracks.html`                |
+| `test-wavedash.js` | l'integration Wavedash sur la sortie terser, avec un SDK qui valide ses types |
 
 `drive-gif.js` n'est pas un test : c'est le pilote automatique du harnais de
 capture (`record-gif.py` du skill js13k-finalize). Il est appele une fois par
