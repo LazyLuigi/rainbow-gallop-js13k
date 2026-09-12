@@ -229,6 +229,7 @@ function buildTrack(){
       segs[i].sp={g:CLOUDS[r()*4|0], x:side*(2.6+r()*4), k:1.5+r()*1.9, y:(260+r()*2100)};
     }
   }
+  segs[0].hd=segs[1].hd=0; // Clear the finish line after generation, preserving the seeded layout.
 }
 buildTrack();
 
