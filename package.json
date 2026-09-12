@@ -6,10 +6,10 @@
   "scripts": {
     "build": "bash build.sh src/index.html",
     "test": "node tools/test.js",
-    "check": "node tools/test.js && node tools/test-wavedash.js",
+    "check": "node tools/test.js && npm run wavedash",
     "build:best": "RRBEST=8 bash build.sh src/index.html",
     "build:fast": "FAST=1 bash build.sh src/index.html",
-    "wavedash": "node tools/test-wavedash.js"
+    "wavedash": "WD_SOURCE=1 node tools/test-wavedash.js && node tools/test-wavedash.js"
   },
   "devDependencies": {
     "roadroller": "^2.1.0",

@@ -6,7 +6,7 @@ canvas context, which is enough to run the whole game under node.
 | script             | what it checks                                                      |
 |--------------------|---------------------------------------------------------------------|
 | `test.js`          | track geometry, physics, a full race, rendering, falling off the road |
-| `test-wavedash.js` | the Wavedash integration, on the terser output, against an SDK that validates its argument types |
+| `test-wavedash.js` | all ten trophy triggers, JSON identifiers and four leaderboard contracts, against a strict SDK stub |
 
 `drive-gif.js` is not a test: it is the autopilot for the capture harness
 (`record-gif.py`). It is called once per frame and writes straight into the
@@ -21,3 +21,7 @@ Each test takes an optional path, defaulting to `src/index.html`:
 The fake context throws as soon as a non-finite value (NaN, Infinity) is
 assigned to the canvas. That is what catches the divide-by-zero cases in the
 projection before they reach the screen.
+
+`npm run wavedash` runs these checks on both source and Terser output, including
+queued trophies, duplicate awards, zero scores and rejected uploads. These local
+tests do not prove that trophy definitions exist or scores persist on Wavedash.

@@ -361,6 +361,7 @@ function reset(){
       b.z=1600+i*380; b.x=(i%2?0.44:-0.44)*(1+(i>3?0.5:0)); b.lane=b.x*0.8; }
   }
   P=RC[0]; parts=[]; raceT=0; lapT=0; best=0; shake=0; msg=''; msgT=0; MTR=0; ST16=0.1;
+  P.cln=1; P.rng=0; P.mt=0; P.top=0; P.mxc=0;  // clean run, rings, time on colour, peaks
 }
 reset();
 function go(){
@@ -457,7 +458,9 @@ function playerStep(dt){
     var ph=(mStep%4)/4+(AC.currentTime-mNext)/(ST16*4); ph-=M.floor(ph);
     var off=musG?mn(ph,1-ph):1;                  // no music, no bonus
     if(off<0.11){ P.boost=mx(P.boost,0.3); P.cmb++; flash(P.cmb>2?'RHYTHM x'+P.cmb:'ON BEAT',0.8);
-      snd(1180,0.14,'triangle',0.05,1760); }
+      snd(1180,0.14,'triangle',0.05,1760);
+      if(P.cmb>P.mxc) P.mxc=P.cmb;
+      if(P.cmb>4) award('ON_THE_BEAT'); }
     else P.cmb=0; }
     snd(430,0.2,'sine',0.045,880);
   }
@@ -482,6 +485,9 @@ function playerStep(dt){
   var mat=P.air>0||lidx(s.n,lane(P.x))===P.col;
   P.mat=mat;
   P.spd=cl(P.spd,0,MAXS*(P.boost>0?1.34:1+0.14*P.asp)*(mat?1.08:1));  // the lanes' only effect
+  P.mt=mat?P.mt+dt:0; if(P.mt>10) award('TRUE_COLOURS');
+  if(P.spd>P.top) P.top=P.spd;
+  if(P.spd>15000) award('LIGHT_SPEED');
   if(mat&&rnd()<0.3) parts.push({x:W/2+(rnd()-0.5)*W*0.1,y:PFY,vx:(rnd()-0.5)*70*U,
     vy:-40*U-rnd()*70*U,l:0.3,m:0.3,c:hsl(LHUE[P.col],100,70),s:(1+rnd()*2.5)*U});
 
@@ -492,7 +498,7 @@ function playerStep(dt){
 
   if(abs(P.x)>1.07){
     if(P.shd>0){ P.x=P.x>0?1:-1; P.spd*=0.9; shake=mx(shake,4); }   // the bubble bounces you back
-    else { P.fall=1; P.ft=0; shake=mx(shake,9); snd(500,0.8,'sine',0.06,60); flash('OFF TRACK!',1); } }
+    else { P.fall=1; P.ft=0; P.cln=0; shake=mx(shake,9); snd(500,0.8,'sine',0.06,60); flash('OFF TRACK!',1); } }
 
   // slipstream: it charges while you hold the wake, and drains fast once you leave it
   var inA=0;
@@ -500,6 +506,7 @@ function playerStep(dt){
     if(db>320&&db<2700&&abs(RC[i].x-P.x)<0.34) inA=1; }
   var was=P.asp;
   P.asp=cl(P.asp+(inA?dt*0.85:-dt*1.7),0,1);
+  if(P.asp>0.999) award('SLIPSTREAM_ACE');
   if(was<0.3&&P.asp>=0.3) snd(240,0.5,'sine',0.04,760);      // the wake is caught
   if(P.asp>0.04){ P.spd+=ACC*0.6*P.asp*dt;
     if(rnd()<0.25+P.asp*0.5) parts.push({x:W/2+(rnd()-0.5)*W*0.16,y:PFY-VS*(0.15+rnd()*0.4),
@@ -519,11 +526,11 @@ function playerStep(dt){
       var hc=s.hd===2?-0.55:s.hd===3?0.55:0, hw=s.hd===1?1.1:0.52;
       if(abs(P.x-hc)<hw+0.1){
         if(P.air<HDH){                            // missed: the unicorn clips it
-          P.spd*=0.62; P.stn=0.5; P.air=0; P.vy=0; shake=mx(shake,8);
+          P.spd*=0.62; P.stn=0.5; P.air=0; P.vy=0; shake=mx(shake,8); P.cln=0;
           flash('OUCH!',1); snd(170,0.3,'square',0.06,60);
         } else if(P.air<HDH+320){                  // cleared just barely: mini turbo
           P.boost=mx(P.boost,0.75); burst(W/2,PFY-VS*0.1,16,2);
-          flash('PERFECT!',1.2); snd(700,0.26,'square',0.05,1900);
+          flash('PERFECT!',1.2); snd(700,0.26,'square',0.05,1900); award('PERFECT_LEAP');
         }
       }
     }
@@ -539,6 +546,7 @@ function playerStep(dt){
     if(s.rg&&abs(P.x-s.rg)<0.3&&P.air>280&&P.air<980){
       P.boost=mx(P.boost,0.6); burst(W/2,PFY-VS*0.4,18,1);
       flash('RING!',1); snd(940,0.3,'triangle',0.05,1600);
+      if(++P.rng>2) award('RING_RUNNER');
     }
   }
   if(s.b&&abs(P.x)<0.95){ P.boost=mx(P.boost,0.85); P.spd=mx(P.spd,MAXS*1.05);
@@ -550,6 +558,16 @@ function playerStep(dt){
     lapT=0;
     if(P.lap>LAPS){ P.done=1; P.time=raceT; mode=3; modeT=0;
       RES=RC.slice().sort(function(a,b){ return prog(b)-prog(a); });
+      var pl=place(P);
+      award('FIRST_GALLOP');
+      if(pl<4) award('PODIUM');
+      if(pl<2) award('RAINBOW_CROWN');
+      if(P.cln) award('CLEAN_SHEET');
+      if(WD&&!wdOk) wdStats();                   // one retry, at an explicit point
+      wdScore('race-v1',raceT*1e3,0,2);       // ASC, milliseconds
+      wdScore('lap-v1',best*1e3,0,2);
+      wdScore('speed-v1',P.top/30,1,0);        // DESC, plain number
+      wdScore('combo-v1',P.mxc,1,0);
       [0,4,7,12,16].forEach(function(n,k){ setTimeout(function(){
         snd(330*M.pow(2,n/12),0.4,'triangle',0.06); },k*115); }); }
     else { if(P.lap===LAPS){ MTR=2; ST16=0.089; }        // final lap: the music rises
@@ -1007,8 +1025,14 @@ function drawHUD(){
     var a2=0.55+0.45*sin(T*3.4);
     txt(touch?'TAP TO RACE AGAIN':'PRESS ANY KEY TO RACE AGAIN',W/2,H*0.9,22*U,'rgba(255,255,255,'+a2.toFixed(2)+')','center');
   }
-  if(msgT>0&&mode!==3){
-    X.globalAlpha=cl(msgT,0,1); rainbowTxt(msg,W/2,H*0.3,mn(W*0.1,64*U)); X.globalAlpha=1;
+  // A trophy is flashed for 3.4 s, a race message for at most 1.8. That gap is
+  // what tells them apart: the trophy alone survives onto the results screen,
+  // and sits lower so it does not cover the standings.
+  if(msgT>0&&(mode!==3||msgT>2)){
+    var lo=mode>2;                               // low only on the results screen,
+    X.globalAlpha=cl(msgT,0,1);                  // where it would cover the standings
+    rainbowTxt(msg,W/2,lo?H*0.73:H*0.3,mn(W*(lo?0.055:0.1),(lo?38:64)*U));
+    X.globalAlpha=1;
   }
 }
 
@@ -1086,10 +1110,43 @@ function step(dt){
       l:0.45,m:0.45,c:hsl(rnd()*360,100,78),s:(1.5+rnd()*3)*U});
 }
 // ------------------------------------------------------------- wavedash
-// Wavedash injects its global before the game code; without this call the page
-// stays hidden behind its loading screen. The guard makes the line inert
-// everywhere else, so no console error on js13kgames.com.
-if(self.Wavedash) Wavedash.init();
+// The platform injects its global before the game code; without init() the page
+// stays hidden behind its loading screen. Every call is guarded on its own, so
+// a missing method never takes the others down, and off-platform the whole
+// block is inert -- no console error on js13kgames.com. Nothing is downloaded.
+var WD=self.Wavedash, wdOk=0, wdQ=[], wdGot={};
+function nop(){}
+function wdCall(m,a,b,c){ try{ if(WD&&WD[m]) return WD[m](a,b,c); }catch(e){} }
+// setAchievement() does nothing until requestStats() has answered, so trophies
+// won before that are queued, and a rejected one goes back in the queue.
+function wdFlush(){
+  if(!wdOk) return;
+  var q=wdQ, i; wdQ=[];
+  for(i=0;i<q.length;i++)
+    if(wdCall('getAchievement',q[i])!==true&&wdCall('setAchievement',q[i],true)!==true) wdQ.push(q[i]);
+}
+function wdScore(n,v,so,dy){
+  var p=wdCall('getOrCreateLeaderboard',n,so,dy), u;
+  // A rejected upload has to be caught too, or it surfaces as a console error.
+  if(p&&p.then) p.then(function(r){
+    if(r&&r.success&&r.data&&r.data.id&&
+      (u=wdCall('uploadLeaderboardScore',r.data.id,M.round(v),true))&&u.catch) u.catch(nop);
+  },nop);
+}
+function wdStats(){
+  var p=wdCall('requestStats');
+  if(p&&p.then) p.then(function(r){ wdOk=!!(r&&r.success&&r.data===true); wdFlush(); },nop);
+}
+// The banner is ours, so a trophy shows on js13kgames.com too, where the
+// platform does not exist. The title is derived from the identifier, which
+// saves carrying a table of names.
+function award(i){
+  if(wdGot[i]) return;
+  wdGot[i]=1; flash(i.replace(/_/g,' '),3.4);
+  snd(1320,0.45,'triangle',0.05,1980);
+  wdQ.push(i); wdFlush();
+}
+if(WD){ wdCall('init'); wdStats(); }
 
 var last=0, acc=0;
 function loop(t){

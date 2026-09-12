@@ -1,0 +1,65 @@
+{
+  "achievements": [
+    {
+      "identifier": "FIRST_GALLOP",
+      "display_name": "First Gallop",
+      "description": "Finish a three-lap race.",
+      "stat_requirement": null
+    },
+    {
+      "identifier": "PODIUM",
+      "display_name": "Podium",
+      "description": "Finish a race in the top three.",
+      "stat_requirement": null
+    },
+    {
+      "identifier": "RAINBOW_CROWN",
+      "display_name": "Rainbow Crown",
+      "description": "Win a race.",
+      "stat_requirement": null
+    },
+    {
+      "identifier": "PERFECT_LEAP",
+      "display_name": "Perfect Leap",
+      "description": "Clear a hurdle with a perfect jump.",
+      "stat_requirement": null
+    },
+    {
+      "identifier": "RING_RUNNER",
+      "display_name": "Ring Runner",
+      "description": "Collect three rings in one race.",
+      "stat_requirement": null
+    },
+    {
+      "identifier": "ON_THE_BEAT",
+      "display_name": "On the Beat",
+      "description": "Reach a rhythm combo of five jumps.",
+      "stat_requirement": null
+    },
+    {
+      "identifier": "SLIPSTREAM_ACE",
+      "display_name": "Slipstream Ace",
+      "description": "Fully charge your slipstream.",
+      "stat_requirement": null
+    },
+    {
+      "identifier": "TRUE_COLOURS",
+      "display_name": "True Colours",
+      "description": "Keep the colour bonus active for over ten seconds, including jumps.",
+      "stat_requirement": null
+    },
+    {
+      "identifier": "LIGHT_SPEED",
+      "display_name": "Light Speed",
+      "description": "Exceed 500 km/h.",
+      "stat_requirement": null
+    },
+    {
+      "identifier": "CLEAN_SHEET",
+      "display_name": "Clean Sheet",
+      "description": "Finish a race without hitting a hurdle or falling off the road.",
+      "stat_requirement": null
+    }
+  ],
+  "stats": []
+}

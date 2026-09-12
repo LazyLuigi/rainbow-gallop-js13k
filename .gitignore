@@ -22,3 +22,7 @@ media/*-source.png
 # versioned: the js13k rules ask for a public repo the game rebuilds from, and
 # the lockfile is what pins the terser and roadroller versions.
 !package-lock.json
+
+# Local recording output and session logs.
+logs/
+media/*.mp4

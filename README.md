@@ -57,8 +57,9 @@ can: roughly 28 visible errors and 10 position changes per race.
 
 ## Building
 
-Requires `node`, `zip`, and network access on the first run so that `terser` and
-`roadroller` can be fetched.
+Requires Node.js (see `.nvmrc`), Python 3 and `zip`/`unzip`.
+Install the pinned tools with `npm ci`. Install AdvanceCOMP (`advzip`) for the
+smallest archive; without it the build may exceed the contest budget.
 
 ```sh
 npm run build          # -> js13k-game.zip, dist/js13k/, dist/wavedash/
@@ -75,23 +76,14 @@ the remaining budget. It takes the source path as its argument.
 Two knobs, both environment variables:
 
 - `RRBEST=n` runs roadroller `n` times and keeps the smallest output. Its
-  parameter search is random: on this source, successive draws ranged from
-  16,431 to 16,475 bytes. **The zip size is not reproducible from one build to
-  the next** — read the number the build just printed, never one written down.
-- `RRSEL=n` sets the number of roadroller contexts, and defaults to 9 here.
-  Fewer contexts means a bigger zip but a much faster decode at load time,
-  which matters because the submission site now runs every uploaded zip in a
-  resource-constrained Chromium. Measured on this game, after advzip:
+  parameter search is random. **The ZIP size varies between builds**; read
+  the measured size printed by the current build.
+- `RRSEL=n` sets the number of Roadroller contexts (default: 10).
+  Fewer contexts decode faster but generally produce a larger archive.
 
-  | contexts | zip | startup, CPU throttled 8x |
-  |---|---|---|
-  | 12 (default) | 12,651 | 6,139 ms |
-  | 9 | 12,747 | 4,814 ms |
-  | 8 | 12,808 | 3,945 ms |
-  | 6 | 13,155 | 3,412 ms |
-
-  Without roadroller at all, the same page starts in 1,204 ms — so the
-  decompressor, not the game, is what costs the startup time.
+Official outputs are replaced only after compression, archive integrity and
+size checks succeed. Failed builds leave the previous outputs intact. Both
+target directories are regenerated to prevent stale files entering an upload.
 
 `FAST=1` skips roadroller entirely and writes to `dist/fast/`; it never touches
 the zip or `dist/js13k/`.
@@ -100,15 +92,29 @@ the zip or `dist/js13k/`.
 
 The game is also entered in the **Wavedash challenge**, which is a checkbox on
 the same js13k entry, not a second submission. The platform injects a `Wavedash`
-global before the game runs; `src/index.html` calls it behind a guard:
+global before the game runs. The game calls `init()` and waits for
+`requestStats()` before sending queued trophies. Every API call is guarded;
+no SDK is bundled and the game also runs without Wavedash.
 
-```js
-if(self.Wavedash) Wavedash.init();
-```
+The ten trophy definitions are in [wavedash-achievements.json](wavedash-achievements.json).
+Import this file in Developer Portal → Achievements → Add achievement → Import
+JSON, then compare with `wavedash achievement list`. Definitions must exist on
+the platform; the game cannot unlock an unknown identifier. On 2026-09-12 the
+CLI reported no remote achievements; the JSON still needs importing.
 
-Nothing is downloaded and no SDK is bundled, so the "no external resources" rule
-still holds: off-platform the global is absent, the line does nothing, and the
-console stays clean. Costs 46 bytes in the zip.
+Four leaderboards are created on race completion, then receive rounded scores
+with `keepBest: true`:
+
+| Name | Score | Order | Display |
+|---|---|---|---|
+| `race-v1` | Race duration | Ascending | Milliseconds |
+| `lap-v1` | Best lap duration | Ascending | Milliseconds |
+| `speed-v1` | Peak speed in km/h | Descending | Number |
+| `combo-v1` | Best rhythm combo, including zero | Descending | Number |
+
+`npm run wavedash` verifies source and Terser output with a strict SDK stub.
+A signed-in race through `wavedash dev` is still needed to verify persistence
+on Wavedash. The CLI cannot list leaderboards.
 
 `wavedash.toml` points at `dist/wavedash/`, which holds the unminified page —
 there is no size limit there, so no roadroller and no decode delay.
@@ -124,6 +130,7 @@ zip. That option is deliberately absent from `build.sh`.
 src/index.html           the game, readable and commented
 build.sh                 the build chain
 wavedash.toml            Wavedash deployment config
+wavedash-achievements.json trophy definitions for portal import
 js13k-game.zip           the submission archive (generated, not committed)
 dist/js13k/index.html    compressed page, the one inside the zip (generated)
 dist/wavedash/index.html unminified page for Wavedash (generated)
@@ -152,3 +159,16 @@ faster tempo on the final lap.
 If the frame rate drops below 38, the renderer drops bloom first, then reduces
 draw distance in steps down to 90 segments.
 
+## Wavedash video
+
+`media/wavedash-gameplay.mp4` is a generated 1280×720 H.264 clip with ten
+seconds of opening gameplay, without the countdown. It is silent. The video
+and intermediate frames are kept locally, outside Git and the game upload.
+
+With the `js13k-finalize` capture harness, Playwright Chromium and ffmpeg:
+
+```sh
+python3 "$HOME/.codex/skills/js13k-finalize/scripts/record-gif.py" \
+  --video --fps 30 --secs 14 --from 109 --take 300 \
+  --driver tools/drive-gif.js --out media/wavedash-gameplay.mp4
+```
